@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.Identity.Stores
 {
-    public abstract class UserStoreBase<TUser, TUserClaim, TUserLogin, TUserToken> : IUserStore<TUser>,
+    internal abstract class UserStoreBase<TUser, TUserClaim, TUserLogin, TUserToken> : IUserStore<TUser>,
         IUserLoginStore<TUser>,
         IUserClaimStore<TUser>,
         IUserPasswordStore<TUser>,

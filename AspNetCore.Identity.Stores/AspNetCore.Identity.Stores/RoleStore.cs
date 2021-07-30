@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.Identity.Stores
 {
-    public class RoleStore<TRole, TRoleClaim> : IRoleStore<TRole>,
+    internal class RoleStore<TRole, TRoleClaim> : IRoleStore<TRole>,
         IRoleClaimStore<TRole>,
         IQueryableRoleStore<TRole>
         where TRole : IdentityRole<string>, new()

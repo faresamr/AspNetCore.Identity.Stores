@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace AspNetCore.Identity.Stores
 {
-    public sealed class UserOnlyStore<TUser, TUserClaim, TUserLogin, TUserToken> : UserStoreBase<TUser, TUserClaim, TUserLogin, TUserToken>
+    internal sealed class UserOnlyStore<TUser, TUserClaim, TUserLogin, TUserToken> : UserStoreBase<TUser, TUserClaim, TUserLogin, TUserToken>
         where TUser : IdentityUser<string>, new()
         where TUserClaim : IdentityUserClaim<string>, new()
         where TUserLogin : IdentityUserLogin<string>, new()

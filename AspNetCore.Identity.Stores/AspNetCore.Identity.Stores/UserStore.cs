@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.Identity.Stores
 {
-    public sealed class UserStore<TUser, TUserClaim, TUserRole, TUserLogin, TUserToken> : UserStoreBase<TUser, TUserClaim, TUserLogin, TUserToken>,
+    internal sealed class UserStore<TUser, TUserClaim, TUserRole, TUserLogin, TUserToken> : UserStoreBase<TUser, TUserClaim, TUserLogin, TUserToken>,
         IUserRoleStore<TUser>
         where TUser : IdentityUser<string>, new()
         where TUserClaim : IdentityUserClaim<string>, new()
