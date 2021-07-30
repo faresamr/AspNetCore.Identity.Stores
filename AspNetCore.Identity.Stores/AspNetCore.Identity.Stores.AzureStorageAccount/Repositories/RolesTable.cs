@@ -2,6 +2,7 @@
 using AspNetCore.Identity.Stores.Repositories;
 using Azure;
 using Azure.Data.Tables;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using System;
@@ -19,53 +20,35 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
         private const string PartitionKey = "Role";
         private readonly string PartitionFilter = $"{nameof(TableEntity.PartitionKey)} eq '{PartitionKey}'";
 
-        public RolesTable(IOptions<StorageAccountOptions> options) : base(options, IdentityTable)
+        public RolesTable(IDataProtectionProvider dataProtectionProvider, IOptions<StorageAccountOptions> options) : base(dataProtectionProvider, options, IdentityTable)
         {
         }
 
-        public async Task<IdentityResult> AddAsync(TRole role, CancellationToken cancellationToken)
+        public Task<IdentityResult> AddAsync(TRole role, CancellationToken cancellationToken)
         {
-            return (await TableClient.UpsertEntityAsync(role.ToTableEntity(PartitionKey, ConvertToString(role.Id)), cancellationToken: cancellationToken)).ToIdentityResult();
+            return AddAsync(PartitionKey, ConvertToString(role.Id), role, cancellationToken: cancellationToken);
         }
 
-        public async Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken)
+        public Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken)
         {
-            return (await TableClient.DeleteEntityAsync(PartitionKey, ConvertToString(role.Id), cancellationToken: cancellationToken)).ToIdentityResult();
+            return DeleteAsync(PartitionKey, ConvertToString(role.Id), cancellationToken: cancellationToken);
         }
 
-        public IQueryable<TRole> Get()
-        {
-            Pageable<TableEntity> queryResultsFilter = TableClient.Query<TableEntity>(filter: PartitionFilter);
-            return queryResultsFilter.Select(i => i.ConvertTo<TRole>()).AsQueryable();
-        }
+        public IQueryable<TRole> Get() => Query<TRole>().AsQueryable();
 
-        public async Task<TRole> GetAsync(TKey roleId, CancellationToken cancellationToken)
+        public Task<TRole> GetAsync(TKey roleId, CancellationToken cancellationToken)
         {
-            var response = await TableClient.GetEntityAsync<TableEntity>(PartitionKey, ConvertToString(roleId), cancellationToken: cancellationToken);
-            if (response.GetRawResponse().IsSuccess())
-                return response.Value.ConvertTo<TRole>();
-            else
-                return null;
+            return QueryAsync<TRole>(PartitionKey, ConvertToString(roleId), cancellationToken: cancellationToken);
         }
 
         public async Task<TRole> GetByNormalizedNameAsync(string normalizedName, CancellationToken cancellationToken)
         {
-            AsyncPageable<TableEntity> queryResultsFilter = TableClient.QueryAsync<TableEntity>(filter: $"{PartitionFilter} and {nameof(IdentityRole<TKey>.NormalizedName)} eq '{normalizedName}'", cancellationToken: cancellationToken);
-            await foreach (TableEntity tableEntity in queryResultsFilter)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                return tableEntity.ConvertTo<TRole>();
-            }
-
-            return null;
+            return (await QueryAsync<TRole>(filter: $"{PartitionFilter} and {nameof(IdentityRole<TKey>.NormalizedName)} eq '{normalizedName}'", cancellationToken: cancellationToken)).FirstOrDefault();
         }
 
-        public async Task<IdentityResult> UpdateAsync(TRole role, CancellationToken cancellationToken)
+        public Task<IdentityResult> UpdateAsync(TRole role, CancellationToken cancellationToken)
         {
-            var tableEntity = role.ToTableEntity(PartitionKey, ConvertToString(role.Id));
-            var response = await TableClient.UpsertEntityAsync(tableEntity, cancellationToken: cancellationToken);
-            return response.ToIdentityResult();
+            return UpdateAsync(PartitionKey, ConvertToString(role.Id), role, cancellationToken);
         }
     }
 }

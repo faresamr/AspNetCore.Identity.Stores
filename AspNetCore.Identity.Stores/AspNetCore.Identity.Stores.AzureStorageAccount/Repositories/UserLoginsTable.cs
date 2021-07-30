@@ -2,10 +2,12 @@
 using AspNetCore.Identity.Stores.Repositories;
 using Azure;
 using Azure.Data.Tables;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,44 +22,33 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
         private readonly string PartitionFilter = $"{nameof(TableEntity.PartitionKey)} eq '{PartitionKey}'";
         private readonly IUsersTable<TUser, TKey> usersTable;
 
-        public UserLoginsTable(IUsersTable<TUser, TKey> usersTable, IOptions<StorageAccountOptions> options) : base(options, IdentityTable)
+        public UserLoginsTable(IUsersTable<TUser, TKey> usersTable, IDataProtectionProvider dataProtectionProvider, IOptions<StorageAccountOptions> options) : base(dataProtectionProvider, options, IdentityTable)
         {
             this.usersTable = usersTable ?? throw new ArgumentNullException(nameof(usersTable));
         }
 
-        public async Task<IdentityResult> AddAsync(TUserLogin userLogin, CancellationToken cancellationToken)
+        public Task<IdentityResult> AddAsync(TUserLogin userLogin, CancellationToken cancellationToken)
         {
-            return (await TableClient.UpsertEntityAsync(userLogin.ToTableEntity(PartitionKey, GetHashKey(userLogin)), cancellationToken: cancellationToken)).ToIdentityResult();
+            return AddAsync(PartitionKey, GetHashKey(userLogin), userLogin, cancellationToken: cancellationToken);
         }
 
-        public async Task<IdentityResult> DeleteAsync(TUser user, string loginProvider, string providerKey, CancellationToken cancellationToken)
+        public Task<IdentityResult> DeleteAsync(TUser user, string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
-            return (await TableClient.DeleteEntityAsync(PartitionKey, GetHashKey(loginProvider, providerKey), cancellationToken: cancellationToken)).ToIdentityResult();
+            return DeleteAsync(PartitionKey, GetHashKey(loginProvider, providerKey), cancellationToken: cancellationToken);
         }
 
         public async Task<IList<TUserLogin>> GetAsync(TUser user, CancellationToken cancellationToken)
         {
-            AsyncPageable<TableEntity> queryResultsFilter = TableClient.QueryAsync<TableEntity>(filter: $"{PartitionFilter} and {nameof(IdentityUserLogin<TKey>.UserId)} eq '{user.Id}'", cancellationToken: cancellationToken);
-            List<TUserLogin> userLogins = new();
-            await foreach (TableEntity tableEntity in queryResultsFilter)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                userLogins.Add(tableEntity.ConvertTo<TUserLogin>());
-            }
-            return userLogins;
+            return (await QueryAsync<TUserLogin>(filter: $"{PartitionFilter} and {nameof(IdentityUserLogin<TKey>.UserId)} eq '{user.Id}'", cancellationToken: cancellationToken)).ToList();
         }
 
         public async Task<TUser> GetAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
-            var response = await TableClient.GetEntityAsync<TableEntity>(PartitionKey, GetHashKey(loginProvider, providerKey), cancellationToken: cancellationToken);
-            if (response.GetRawResponse().IsSuccess())
-            {
-                TUserLogin userLogin = response.Value.ConvertTo<TUserLogin>();
-                if (userLogin is not null)
-                    return await usersTable.GetAsync(userLogin.UserId, cancellationToken);
-            }
-            return null;
+            var userLogin = await QueryAsync<TUserLogin>(PartitionKey, GetHashKey(loginProvider, providerKey), cancellationToken: cancellationToken);
+            if (userLogin is not null)
+                return await usersTable.GetAsync(userLogin.UserId, cancellationToken);
+            else
+                return null;
         }
 
         private static string GetHashKey(TUserLogin userLogin) => GetHashKey(userLogin.LoginProvider, userLogin.ProviderKey);

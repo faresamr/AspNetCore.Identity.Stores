@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.Data.Tables" Version="12.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="5.0.8" />
     <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="5.0.8" />
   </ItemGroup>
 

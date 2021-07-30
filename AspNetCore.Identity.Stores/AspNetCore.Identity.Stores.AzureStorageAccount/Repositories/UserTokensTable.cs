@@ -2,6 +2,7 @@
 using AspNetCore.Identity.Stores.Repositories;
 using Azure;
 using Azure.Data.Tables;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using System;
@@ -18,40 +19,28 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
         private const string PartitionKey = "UserToken";
         private readonly string PartitionFilter = $"{nameof(TableEntity.PartitionKey)} eq '{PartitionKey}'";
 
-        public UserTokensTable(IOptions<StorageAccountOptions> options) : base(options, IdentityTable)
+        public UserTokensTable(IDataProtectionProvider dataProtectionProvider, IOptions<StorageAccountOptions> options) : base(dataProtectionProvider, options, IdentityTable)
         {
         }
 
-        public async Task<IdentityResult> AddAsync(TUserToken userToken, CancellationToken cancellationToken)
+        public Task<IdentityResult> AddAsync(TUserToken userToken, CancellationToken cancellationToken)
         {
-            return (await TableClient.UpsertEntityAsync(userToken.ToTableEntity(PartitionKey, GetHashKey(userToken)), cancellationToken: cancellationToken)).ToIdentityResult();
+            return AddAsync(PartitionKey, GetHashKey(userToken), userToken, cancellationToken: cancellationToken);
         }
 
-        public async Task<IdentityResult> DeleteAsync(TKey userId, string loginProvider, string name, CancellationToken cancellationToken)
+        public Task<IdentityResult> DeleteAsync(TKey userId, string loginProvider, string name, CancellationToken cancellationToken)
         {
-            return (await TableClient.DeleteEntityAsync(PartitionKey, GetHashKey(userId, loginProvider, name), cancellationToken: cancellationToken)).ToIdentityResult();
+            return DeleteAsync(PartitionKey, GetHashKey(userId, loginProvider, name), cancellationToken: cancellationToken);
         }
 
-        public async Task<TUserToken> GetAsync(TKey userId, string loginProvider, string name, CancellationToken cancellationToken)
+        public Task<TUserToken> GetAsync(TKey userId, string loginProvider, string name, CancellationToken cancellationToken)
         {
-            var response = await TableClient.GetEntityAsync<TableEntity>(PartitionKey, GetHashKey(userId, loginProvider, name), cancellationToken: cancellationToken);
-            if (response.GetRawResponse().IsSuccess())
-                return response.Value.ConvertTo<TUserToken>();
-            else
-                return null;
+            return QueryAsync<TUserToken>(PartitionKey, GetHashKey(userId, loginProvider, name), cancellationToken: cancellationToken);
         }
 
-        public async Task<IList<TUserToken>> GetAsync(TKey userId, CancellationToken cancellationToken)
+        public Task<IList<TUserToken>> GetAsync(TKey userId, CancellationToken cancellationToken)
         {
-            AsyncPageable<TableEntity> queryResultsFilter = TableClient.QueryAsync<TableEntity>(filter: $"{PartitionFilter} and {nameof(IdentityUserToken<TKey>.UserId)} eq '{userId}'", cancellationToken: cancellationToken);
-            List<TUserToken> userTokens = new();
-            await foreach (TableEntity tableEntity in queryResultsFilter)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                userTokens.Add(tableEntity.ConvertTo<TUserToken>());
-            }
-            return userTokens;
+            return QueryAsync<TUserToken>(filter: $"{PartitionFilter} and {nameof(IdentityUserToken<TKey>.UserId)} eq '{userId}'", cancellationToken: cancellationToken);
         }
 
         private static string GetHashKey(TUserToken userToken) => GetHashKey(userToken.UserId, userToken.LoginProvider, userToken.Name);

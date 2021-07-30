@@ -2,6 +2,7 @@
 using AspNetCore.Identity.Stores.Repositories;
 using Azure;
 using Azure.Data.Tables;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using System;
@@ -17,66 +18,40 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
     {
         private const string PartitionKey = "User";
         private readonly string PartitionFilter = $"{nameof(TableEntity.PartitionKey)} eq '{PartitionKey}'";
-        public UsersTable(IOptions<StorageAccountOptions> options) : base(options, IdentityTable)
+        public UsersTable(IDataProtectionProvider dataProtectionProvider, IOptions<StorageAccountOptions> options) : base(dataProtectionProvider, options, IdentityTable)
         {
         }
 
-        public async Task<IdentityResult> AddAsync(TUser user, CancellationToken cancellationToken)
+        public Task<IdentityResult> AddAsync(TUser user, CancellationToken cancellationToken)
         {
-            return (await TableClient.UpsertEntityAsync(user.ToTableEntity(PartitionKey, ConvertToString(user.Id)), cancellationToken: cancellationToken)).ToIdentityResult();
+            return AddAsync(PartitionKey, ConvertToString(user.Id), user, cancellationToken: cancellationToken);
         }
 
-        public async Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken)
+        public Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken)
         {
-            return (await TableClient.DeleteEntityAsync(PartitionKey, ConvertToString(user.Id), cancellationToken: cancellationToken)).ToIdentityResult();
+            return DeleteAsync(PartitionKey, ConvertToString(user.Id), cancellationToken: cancellationToken);
         }
 
-        public IQueryable<TUser> Get()
-        {
-            Pageable<TableEntity> queryResultsFilter = TableClient.Query<TableEntity>(filter: PartitionFilter);
-            return queryResultsFilter.Select(i => i.ConvertTo<TUser>()).AsQueryable();
-        }
+        public IQueryable<TUser> Get() => Query<TUser>().AsQueryable();
 
-        public async Task<TUser> GetAsync(TKey userId, CancellationToken cancellationToken)
+        public Task<TUser> GetAsync(TKey userId, CancellationToken cancellationToken)
         {
-            var response = await TableClient.GetEntityAsync<TableEntity>(PartitionKey, ConvertToString(userId), cancellationToken: cancellationToken);
-            if (response.GetRawResponse().IsSuccess())
-                return response.Value.ConvertTo<TUser>();
-            else
-                return null;
+            return QueryAsync<TUser>(PartitionKey, ConvertToString(userId), cancellationToken: cancellationToken); ;
         }
 
         public async Task<TUser> GetByNormalizedEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
         {
-            AsyncPageable<TableEntity> queryResultsFilter = TableClient.QueryAsync<TableEntity>(filter: $"{PartitionFilter} and {nameof(IdentityUser<TKey>.NormalizedEmail)} eq '{normalizedEmail}'", cancellationToken: cancellationToken);
-            await foreach (TableEntity tableEntity in queryResultsFilter)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                return tableEntity.ConvertTo<TUser>();
-            }
-
-            return null;
+            return (await QueryAsync<TUser>(filter: $"{PartitionFilter} and {nameof(IdentityUser<TKey>.NormalizedEmail)} eq '{normalizedEmail}'", cancellationToken: cancellationToken)).FirstOrDefault();
         }
 
         public async Task<TUser> GetByNormalizedUserNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
-            AsyncPageable<TableEntity> queryResultsFilter = TableClient.QueryAsync<TableEntity>(filter: $"{PartitionFilter} and {nameof(IdentityUser<TKey>.NormalizedUserName)} eq '{normalizedUserName}'", cancellationToken: cancellationToken);
-            await foreach (TableEntity tableEntity in queryResultsFilter)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                return tableEntity.ConvertTo<TUser>();
-            }
-
-            return null;
+            return (await QueryAsync<TUser>(filter: $"{PartitionFilter} and {nameof(IdentityUser<TKey>.NormalizedUserName)} eq '{normalizedUserName}'", cancellationToken: cancellationToken)).FirstOrDefault();
         }
 
-        public async Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken)
+        public Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken)
         {
-            var tableEntity = user.ToTableEntity(PartitionKey, ConvertToString(user.Id));
-            var response = await TableClient.UpsertEntityAsync(tableEntity, cancellationToken: cancellationToken);
-            return response.ToIdentityResult();
+            return UpdateAsync(PartitionKey, ConvertToString(user.Id), user, cancellationToken);
         }
     }
 }

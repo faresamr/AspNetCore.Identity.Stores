@@ -2,10 +2,12 @@
 using AspNetCore.Identity.Stores.Repositories;
 using Azure;
 using Azure.Data.Tables;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,44 +20,28 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
         private const string PartitionKey = "UserRole";
         private readonly string PartitionFilter = $"{nameof(TableEntity.PartitionKey)} eq '{PartitionKey}'";
 
-        public UserRolesTable(IOptions<StorageAccountOptions> options) : base(options, IdentityTable)
+        public UserRolesTable(IDataProtectionProvider dataProtectionProvider, IOptions<StorageAccountOptions> options) : base(dataProtectionProvider, options, IdentityTable)
         {
         }
 
-        public async Task<IdentityResult> AddAsync(TUserRole userToken, CancellationToken cancellationToken)
+        public Task<IdentityResult> AddAsync(TUserRole userToken, CancellationToken cancellationToken)
         {
-            return (await TableClient.UpsertEntityAsync(userToken.ToTableEntity(PartitionKey, GetHashKey(userToken)), cancellationToken: cancellationToken)).ToIdentityResult();
+            return AddAsync(PartitionKey, GetHashKey(userToken), userToken, cancellationToken: cancellationToken);
         }
 
-        public async Task<IdentityResult> DeleteAsync(TKey userId, TKey roleId, CancellationToken cancellationToken)
+        public Task<IdentityResult> DeleteAsync(TKey userId, TKey roleId, CancellationToken cancellationToken)
         {
-            return (await TableClient.DeleteEntityAsync(PartitionKey, GetHashKey(userId, roleId), cancellationToken: cancellationToken)).ToIdentityResult();
+            return DeleteAsync(PartitionKey, GetHashKey(userId, roleId), cancellationToken: cancellationToken);
         }
 
         public async Task<IList<TUserRole>> GetUsersAsync(TKey roleId, CancellationToken cancellationToken)
         {
-            AsyncPageable<TableEntity> queryResultsFilter = TableClient.QueryAsync<TableEntity>(filter: $"{PartitionFilter} and {nameof(IdentityUserRole<TKey>.RoleId)} eq '{roleId}'", cancellationToken: cancellationToken);
-            List<TUserRole> userRoles = new();
-            await foreach (TableEntity tableEntity in queryResultsFilter)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                userRoles.Add(tableEntity.ConvertTo<TUserRole>());
-            }
-            return userRoles;
+            return (await QueryAsync<TUserRole>(filter: $"{PartitionFilter} and {nameof(IdentityUserRole<TKey>.RoleId)} eq '{roleId}'", cancellationToken: cancellationToken)).ToList();
         }
 
         public async Task<IList<TUserRole>> GetRolesAsync(TKey userId, CancellationToken cancellationToken)
         {
-            AsyncPageable<TableEntity> queryResultsFilter = TableClient.QueryAsync<TableEntity>(filter: $"{PartitionFilter} and {nameof(IdentityUserRole<TKey>.UserId)} eq '{userId}'", cancellationToken: cancellationToken);
-            List<TUserRole> userRoles = new();
-            await foreach (TableEntity tableEntity in queryResultsFilter)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                userRoles.Add(tableEntity.ConvertTo<TUserRole>());
-            }
-            return userRoles;
+            return (await QueryAsync<TUserRole>(filter: $"{PartitionFilter} and {nameof(IdentityUserRole<TKey>.UserId)} eq '{userId}'", cancellationToken: cancellationToken)).ToList();
         }
 
         private static string GetHashKey(TUserRole userRole) => GetHashKey(userRole.UserId, userRole.RoleId);
