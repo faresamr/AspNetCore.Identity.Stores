@@ -22,7 +22,7 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
         {
         }
 
-        public async Task<IdentityResult> CreateAsync(TUserRole userToken, CancellationToken cancellationToken)
+        public async Task<IdentityResult> AddAsync(TUserRole userToken, CancellationToken cancellationToken)
         {
             return (await TableClient.UpsertEntityAsync(userToken.ToTableEntity(PartitionKey, GetHashKey(userToken)), cancellationToken: cancellationToken)).ToIdentityResult();
         }

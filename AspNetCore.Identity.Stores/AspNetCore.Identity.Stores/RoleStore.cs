@@ -30,7 +30,7 @@ namespace AspNetCore.Identity.Stores
         #endregion
 
         #region IRoleStore
-        public Task<IdentityResult> CreateAsync(TRole role, CancellationToken cancellationToken) => rolesTable.CreateAsync(role, cancellationToken);
+        public Task<IdentityResult> CreateAsync(TRole role, CancellationToken cancellationToken) => rolesTable.AddAsync(role, cancellationToken);
 
         public Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken) => rolesTable.DeleteAsync(role, cancellationToken);
 

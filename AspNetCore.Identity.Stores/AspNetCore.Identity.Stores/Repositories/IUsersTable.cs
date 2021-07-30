@@ -10,7 +10,7 @@ namespace AspNetCore.Identity.Stores.Repositories
         where TUser : IdentityUser<TKey>, new()
         where TKey : IEquatable<TKey>
     {
-        Task<IdentityResult> CreateAsync(TUser user, CancellationToken cancellationToken);
+        Task<IdentityResult> AddAsync(TUser user, CancellationToken cancellationToken);
         Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken);
         Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken);
         Task<TUser> GetAsync(TKey userId, CancellationToken cancellationToken);

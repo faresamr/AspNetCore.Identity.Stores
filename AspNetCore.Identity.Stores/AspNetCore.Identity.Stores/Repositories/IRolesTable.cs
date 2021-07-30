@@ -10,7 +10,7 @@ namespace AspNetCore.Identity.Stores.Repositories
         where TRole : IdentityRole<TKey>, new()
         where TKey : IEquatable<TKey>
     {
-        Task<IdentityResult> CreateAsync(TRole role, CancellationToken cancellationToken);
+        Task<IdentityResult> AddAsync(TRole role, CancellationToken cancellationToken);
         Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken);
         Task<IdentityResult> UpdateAsync(TRole role, CancellationToken cancellationToken);
         Task<TRole> GetAsync(TKey roleId, CancellationToken cancellationToken);
