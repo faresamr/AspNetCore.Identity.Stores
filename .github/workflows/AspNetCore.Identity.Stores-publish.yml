@@ -3,6 +3,8 @@ name: Publish Packages
 on:
   push:
     branches: [ main ]
+    paths:
+      - AspNetCore.Identity.Stores/**
 
 jobs:
   build:
