@@ -28,14 +28,19 @@ namespace SampleWebApplication
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //Adds data protection services, needed to protect the identity personal data
             services.AddDataProtection();
 
+            //Configure identity repository connection
             services.Configure<IdentityStorageAccountOptions>(options => options
                 .UseAzureStorageAccount(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddRoles<IdentityRole>()
-                .AddAzureStorageAccountStores();
+                .AddAzureStorageAccountStores(); //Add Identity stores
+
+            //It's recommended to implement ILookupNormalizer to protect normalized user data
+            services.AddScoped<ILookupNormalizer, LookupNormalizer>();
 
             services.AddRazorPages();
         }

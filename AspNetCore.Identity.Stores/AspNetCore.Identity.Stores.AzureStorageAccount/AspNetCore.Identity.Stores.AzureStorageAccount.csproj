@@ -1,7 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <Authors>Fares Amro</Authors>
+    <PackageProjectUrl>https://github.com/faresamr/AspNetCore.Identity.Stores</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/faresamr/AspNetCore.Identity.Stores</RepositoryUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageTags>AspNetCore;Identity;Identity Store;Azure Storage Account;Azure Table Storage</PackageTags>
+    <Description>ASP.NET Core Identity provider that uses Microsoft Azure Storage Account.</Description>
+    <Company />
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,6 +19,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AspNetCore.Identity.Stores\AspNetCore.Identity.Stores.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
