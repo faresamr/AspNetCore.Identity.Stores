@@ -1,4 +1,4 @@
-name: .NET
+name: AspNetCore.Identity.Stores-publish
 
 on:
   push:
@@ -16,11 +16,11 @@ jobs:
       with:
         dotnet-version: 5.0.x
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore AspNetCore.Identity.Stores/AspNetCore.Identity.Stores
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build --no-restore AspNetCore.Identity.Stores/AspNetCore.Identity.Stores
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --no-build --verbosity normal AspNetCore.Identity.Stores/AspNetCore.Identity.Stores
     - name: Publish AspNetCore.Identity.Stores.AzureStorageAccount
       uses: brandedoutcast/publish-nuget@v2.5.2
       with:
