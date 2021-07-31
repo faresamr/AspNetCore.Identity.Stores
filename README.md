@@ -1,7 +1,7 @@
 [![Publish Packages](https://github.com/faresamr/AspNetCore.Identity.Stores/actions/workflows/AspNetCore.Identity.Stores-publish.yml/badge.svg)](https://github.com/faresamr/AspNetCore.Identity.Stores/actions/workflows/AspNetCore.Identity.Stores-publish.yml)
 
 # Getting started
-This repo provide a custom identity stores for ASP.NET to use Azure storage account instef of EtityFramework
+This repo provide a custom identity stores for ASP.NET to use Azure storage account insted of Entity Framework
 
 1. Create a new **ASP.NET Core Web App**
 2. From **Additional information** dialog select authentication type **Individual Accounts**
