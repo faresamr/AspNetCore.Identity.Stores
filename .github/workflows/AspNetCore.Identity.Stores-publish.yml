@@ -26,3 +26,4 @@ jobs:
       with:
           PROJECT_FILE_PATH: AspNetCore.Identity.Stores/AspNetCore.Identity.Stores.AzureStorageAccount/AspNetCore.Identity.Stores.AzureStorageAccount.csproj
           NUGET_KEY: ${{secrets.NUGET}}
+          VERSION_REGEX: ^\s*<Version>(.*)<\/Version>$
