@@ -67,11 +67,18 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
 
         protected async Task<T> QueryAsync<T>(string partitionKey, string rowKey, CancellationToken cancellationToken = default) where T : class, new()
         {
-            var response = await tableClient.GetEntityAsync<TableEntity>(partitionKey, rowKey, cancellationToken: cancellationToken);
-            if (response.GetRawResponse().IsSuccess())
-                return response.Value.ConvertTo<T>(dataProtector);
-            else
+            try
+            {
+                var response = await tableClient.GetEntityAsync<TableEntity>(partitionKey, rowKey, cancellationToken: cancellationToken);
+                if (response.GetRawResponse().IsSuccess())
+                    return response.Value.ConvertTo<T>(dataProtector);
+                else
+                    return null;
+            }
+            catch (RequestFailedException)
+            {
                 return null;
+            }
         }
 
         public async Task<IdentityResult> UpdateAsync<T>(string partitionKey, string rowKey, T entity, CancellationToken cancellationToken) where T : class

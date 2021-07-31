@@ -40,16 +40,17 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Extensions
             var entity = new TableEntity(partitionKey, rowKey);
             foreach (var property in typeof(T).GetProperties().Where(i => i.CanWrite && i.CanRead))
             {
-                object value;
-                if (property.GetCustomAttribute<ProtectedPersonalDataAttribute>() is ProtectedPersonalDataAttribute)
+                if (property.GetValue(obj) is object propertyValue)
                 {
-                    value = dataProtector.Protect(property.GetValue(obj).ConvertToByteArray());
+                    if (property.GetCustomAttribute<ProtectedPersonalDataAttribute>() is ProtectedPersonalDataAttribute)
+                    {
+                        entity.Add(property.Name, dataProtector.Protect(propertyValue.ConvertToByteArray()));
+                    }
+                    else
+                    {
+                        entity.Add(property.Name, propertyValue);
+                    }
                 }
-                else
-                {
-                    value = property.GetValue(obj);
-                }
-                entity.Add(property.Name, value);
             }
 
             return entity;

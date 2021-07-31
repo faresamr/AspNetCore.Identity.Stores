@@ -270,7 +270,7 @@ namespace AspNetCore.Identity.Stores
 
         public Task RemoveTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken) => userTokensTable.DeleteAsync(user.Id, loginProvider, name, cancellationToken);
 
-        public async Task<string> GetTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken) => (await userTokensTable.GetAsync(user.Id, loginProvider, name, cancellationToken)).Value;
+        public async Task<string> GetTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken) => (await userTokensTable.GetAsync(user.Id, loginProvider, name, cancellationToken))?.Value;
         #endregion
 
         #region IUserAuthenticatorKeyStore
