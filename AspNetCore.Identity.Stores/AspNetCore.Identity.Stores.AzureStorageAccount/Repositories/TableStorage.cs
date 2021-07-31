@@ -19,7 +19,7 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
         private readonly IDataProtector dataProtector;
         private readonly TableClient tableClient;
 
-        public TableStorage(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStorageAccountOptions> options, string tableName)
+        public TableStorage(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options, string tableName)
         {
             if (options is null)
             {
@@ -32,7 +32,7 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
             }
 
             dataProtector = dataProtectionProvider.CreateProtector(tableName);
-            tableClient = new(options.Value.ConnectionString, tableName);
+            tableClient = new(options.Value.GetConnectionString(), tableName);
         }
     
         protected static string ConvertToString<T>(T value) where T : IEquatable<T> => Convert.ToString(value);

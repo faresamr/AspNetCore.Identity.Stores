@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AspNetCore.Identity.Stores.AzureStorageAccount.Extensions
+namespace AspNetCore.Identity.Stores.Shared.Extensions
 {
     internal static class StringExtensions
     {

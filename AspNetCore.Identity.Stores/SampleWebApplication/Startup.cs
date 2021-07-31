@@ -1,3 +1,4 @@
+using AspNetCore.Identity.Stores;
 using AspNetCore.Identity.Stores.AzureStorageAccount;
 using AspNetCore.Identity.Stores.AzureStorageAccount.Extensions;
 using Microsoft.AspNetCore.Builder;
@@ -32,7 +33,7 @@ namespace SampleWebApplication
             services.AddDataProtection();
 
             //Configure identity repository connection
-            services.Configure<IdentityStorageAccountOptions>(options => options
+            services.Configure<IdentityStoresOptions>(options => options
                 .UseAzureStorageAccount(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)

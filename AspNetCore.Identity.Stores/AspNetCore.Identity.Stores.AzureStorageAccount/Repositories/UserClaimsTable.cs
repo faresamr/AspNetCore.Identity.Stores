@@ -1,5 +1,6 @@
 ﻿using AspNetCore.Identity.Stores.AzureStorageAccount.Extensions;
 using AspNetCore.Identity.Stores.Repositories;
+using AspNetCore.Identity.Stores.Shared.Extensions;
 using Azure;
 using Azure.Data.Tables;
 using Microsoft.AspNetCore.DataProtection;
@@ -23,7 +24,7 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
         private readonly string PartitionFilter = $"{nameof(TableEntity.PartitionKey)} eq '{PartitionKey}'";
         private readonly IUsersTable<TUser, TKey> usersTable;
 
-        public UserClaimsTable(IUsersTable<TUser, TKey> usersTable, IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStorageAccountOptions> options) : base(dataProtectionProvider, options, IdentityTable)
+        public UserClaimsTable(IUsersTable<TUser, TKey> usersTable, IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options) : base(dataProtectionProvider, options, IdentityTable)
         {
             this.usersTable = usersTable ?? throw new ArgumentNullException(nameof(usersTable));
         }
