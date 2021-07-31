@@ -1,4 +1,4 @@
-name: AspNetCore.Identity.Stores-publish
+name: Publish Packages
 
 on:
   push:
@@ -21,8 +21,14 @@ jobs:
       run: dotnet build --no-restore AspNetCore.Identity.Stores/AspNetCore.Identity.Stores
     - name: Test
       run: dotnet test --no-build --verbosity normal AspNetCore.Identity.Stores/AspNetCore.Identity.Stores
+    - name: Publish AspNetCore.Identity.Stores
+      uses: brandedoutcast/publish-nuget@v2
+      with:
+          PROJECT_FILE_PATH: AspNetCore.Identity.Stores/AspNetCore.Identity.Stores/AspNetCore.Identity.Stores.csproj
+          NUGET_KEY: ${{secrets.NUGET}}
+          VERSION_REGEX: ^\s*<Version>(.*)<\/Version>$
     - name: Publish AspNetCore.Identity.Stores.AzureStorageAccount
-      uses: brandedoutcast/publish-nuget@v2.5.2
+      uses: brandedoutcast/publish-nuget@v2
       with:
           PROJECT_FILE_PATH: AspNetCore.Identity.Stores/AspNetCore.Identity.Stores.AzureStorageAccount/AspNetCore.Identity.Stores.AzureStorageAccount.csproj
           NUGET_KEY: ${{secrets.NUGET}}
