@@ -30,7 +30,7 @@ namespace SampleWebApplication
         {
             services.AddDataProtection();
 
-            services.Configure<StorageAccountOptions>(options => options
+            services.Configure<IdentityStorageAccountOptions>(options => options
                 .UseAzureStorageAccount(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)

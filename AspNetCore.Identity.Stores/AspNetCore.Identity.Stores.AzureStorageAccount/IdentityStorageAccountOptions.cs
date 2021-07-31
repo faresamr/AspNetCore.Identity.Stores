@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.Identity.Stores.AzureStorageAccount
 {
-    public sealed class StorageAccountOptions
+    public sealed class IdentityStorageAccountOptions
     {
         public string ConnectionString { get; private set; }
 
-        public StorageAccountOptions UseAzureStorageAccount(string connectionString)
+        public IdentityStorageAccountOptions UseAzureStorageAccount(string connectionString)
         {
             ConnectionString = connectionString;
             TableClient tableClient = new(connectionString, TableStorage.IdentityTable);

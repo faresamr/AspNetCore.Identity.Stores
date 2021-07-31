@@ -19,7 +19,7 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
         private readonly IDataProtector dataProtector;
         private readonly TableClient tableClient;
 
-        public TableStorage(IDataProtectionProvider dataProtectionProvider, IOptions<StorageAccountOptions> options, string tableName)
+        public TableStorage(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStorageAccountOptions> options, string tableName)
         {
             if (options is null)
             {
