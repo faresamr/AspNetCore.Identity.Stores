@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AspNetCore.Identity.Stores.AzureCosmosDB\AspNetCore.Identity.Stores.AzureCosmosDB.csproj" />
     <ProjectReference Include="..\AspNetCore.Identity.Stores.AzureStorageAccount\AspNetCore.Identity.Stores.AzureStorageAccount.csproj" />
   </ItemGroup>
 

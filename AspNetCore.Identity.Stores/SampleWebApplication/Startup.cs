@@ -1,19 +1,16 @@
+//#define AzureCosmosDB
+#define AzureStorageAccount
+
 using AspNetCore.Identity.Stores;
-using AspNetCore.Identity.Stores.AzureStorageAccount;
+using AspNetCore.Identity.Stores.AzureCosmosDB.Extensions;
 using AspNetCore.Identity.Stores.AzureStorageAccount.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace SampleWebApplication
 {
@@ -32,6 +29,7 @@ namespace SampleWebApplication
             //Adds data protection services, needed to protect the identity personal data
             services.AddDataProtection();
 
+#if AzureStorageAccount
             //Configure identity repository connection
             services.Configure<IdentityStoresOptions>(options => options
                 .UseAzureStorageAccount(Configuration.GetConnectionString("DefaultConnection")));
@@ -39,6 +37,16 @@ namespace SampleWebApplication
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddRoles<IdentityRole>()
                 .AddAzureStorageAccountStores(); //Add Identity stores
+#elif AzureCosmosDB
+            //Configure identity repository connection
+            services.Configure<IdentityStoresOptions>(options => options
+                .UseAzureCosmosDB(Configuration.GetConnectionString("DefaultConnection"), "MyDatabase"));
+
+            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddRoles<IdentityRole>()
+                .AddAzureCosmosDbStores(); //Add Identity stores
+#endif
+
 
             //It's recommended to implement ILookupNormalizer to protect normalized user data
             services.AddScoped<ILookupNormalizer, LookupNormalizer>();
