@@ -21,7 +21,7 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
         private const string PartitionKey = "UserRole";
         private readonly string PartitionFilter = $"{nameof(TableEntity.PartitionKey)} eq '{PartitionKey}'";
 
-        public UserRolesTable(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options) : base(dataProtectionProvider, options, IdentityTable)
+        public UserRolesTable(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options) : base(dataProtectionProvider, options)
         {
         }
 

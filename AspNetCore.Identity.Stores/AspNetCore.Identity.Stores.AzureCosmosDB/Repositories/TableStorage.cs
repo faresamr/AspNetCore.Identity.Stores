@@ -28,11 +28,11 @@ namespace AspNetCore.Identity.Stores.AzureCosmosDB.Repositories
                 throw new ArgumentNullException(nameof(options));
             }
 
-            dataProtector = dataProtectionProvider.CreateProtector(options.Value.GetContainerIdString());
+            dataProtector = dataProtectionProvider.CreateProtector(options.Value.GetContainerId());
 
             CosmosClient cosmosClient = new(options.Value.GetConnectionString());
-            Database database = cosmosClient.GetDatabase(options.Value.GetDatabaseIdString());
-            container = database.GetContainer(options.Value.GetContainerIdString());
+            Database database = cosmosClient.GetDatabase(options.Value.GetDatabaseId());
+            container = database.GetContainer(options.Value.GetContainerId());
         }
     
         protected static string ConvertToString<T>(T value) where T : IEquatable<T> => Convert.ToString(value);

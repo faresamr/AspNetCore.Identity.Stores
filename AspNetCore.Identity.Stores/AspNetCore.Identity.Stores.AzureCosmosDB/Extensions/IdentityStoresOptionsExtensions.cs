@@ -23,8 +23,8 @@ namespace AspNetCore.Identity.Stores.AzureCosmosDB.Extensions
         }
 
         public static string GetConnectionString(this IdentityStoresOptions identityStoresOptions) => (options[identityStoresOptions] as AzureCosmosDBOptions).ConnectionString;
-        public static string GetDatabaseIdString(this IdentityStoresOptions identityStoresOptions) => (options[identityStoresOptions] as AzureCosmosDBOptions).DatabaseId;
-        public static string GetContainerIdString(this IdentityStoresOptions identityStoresOptions) => (options[identityStoresOptions] as AzureCosmosDBOptions).ContainerId;
+        public static string GetDatabaseId(this IdentityStoresOptions identityStoresOptions) => (options[identityStoresOptions] as AzureCosmosDBOptions).DatabaseId;
+        public static string GetContainerId(this IdentityStoresOptions identityStoresOptions) => (options[identityStoresOptions] as AzureCosmosDBOptions).ContainerId;
 
         private record AzureCosmosDBOptions(string ConnectionString, string DatabaseId, string ContainerId);
     }

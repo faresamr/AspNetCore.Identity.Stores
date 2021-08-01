@@ -15,24 +15,18 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
 {
     internal abstract class TableStorage
     {
-        internal const string IdentityTable = "Identity";
         private readonly IDataProtector dataProtector;
         private readonly TableClient tableClient;
 
-        public TableStorage(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options, string tableName)
+        public TableStorage(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options)
         {
             if (options is null)
             {
                 throw new ArgumentNullException(nameof(options));
             }
 
-            if (string.IsNullOrEmpty(tableName))
-            {
-                throw new ArgumentException($"'{nameof(tableName)}' cannot be null or empty.", nameof(tableName));
-            }
-
-            dataProtector = dataProtectionProvider.CreateProtector(tableName);
-            tableClient = new(options.Value.GetConnectionString(), tableName);
+            dataProtector = dataProtectionProvider.CreateProtector(options.Value.GetTableName());
+            tableClient = new(options.Value.GetConnectionString(), options.Value.GetTableName());
         }
     
         protected static string ConvertToString<T>(T value) where T : IEquatable<T> => Convert.ToString(value);

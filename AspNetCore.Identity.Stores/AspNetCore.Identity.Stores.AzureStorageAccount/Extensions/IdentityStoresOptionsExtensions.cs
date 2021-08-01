@@ -13,14 +13,17 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Extensions
     {
         private static readonly Hashtable connectionStrings = new();
 
-        public static IdentityStoresOptions UseAzureStorageAccount(this IdentityStoresOptions identityStoresOptions, string connectionString)
+        public static IdentityStoresOptions UseAzureStorageAccount(this IdentityStoresOptions identityStoresOptions, string connectionString, string tableName = "AspNetIdentity")
         {
-            connectionStrings[identityStoresOptions] = connectionString;
-            TableClient tableClient = new(connectionString, TableStorage.IdentityTable);
+            connectionStrings[identityStoresOptions] = new AzureStorageAccountOptions(connectionString, tableName);
+            TableClient tableClient = new(connectionString, tableName);
             tableClient.CreateIfNotExists();
             return identityStoresOptions;
         }
 
-        public static string GetConnectionString(this IdentityStoresOptions identityStoresOptions) => connectionStrings[identityStoresOptions] as string;
+        public static string GetConnectionString(this IdentityStoresOptions identityStoresOptions) => (connectionStrings[identityStoresOptions] as AzureStorageAccountOptions).ConnectionString;
+        public static string GetTableName(this IdentityStoresOptions identityStoresOptions) => (connectionStrings[identityStoresOptions] as AzureStorageAccountOptions).TableName;
+    
+        private record AzureStorageAccountOptions(string ConnectionString, string TableName);
     }
 }

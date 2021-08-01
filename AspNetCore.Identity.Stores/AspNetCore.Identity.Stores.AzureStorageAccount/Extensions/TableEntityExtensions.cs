@@ -28,7 +28,10 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Extensions
                     }
                     else
                     {
-                        property.SetValue(obj, value);
+                        if (property.PropertyType == value.GetType())
+                            property.SetValue(obj, value);
+                        else
+                            property.SetValue(obj, Convert.ChangeType(value, property.PropertyType));
                     }
                 }
             }
