@@ -5,7 +5,7 @@ This is how to use Azure Cosmos DB as storage for ASP.NET identity.
 2. From **Additional information** dialog select authentication type **Individual Accounts**
 3. Install [AspNetCore.Identity.Stores.AzureCosmosDB](https://www.nuget.org/packages/AspNetCore.Identity.Stores.AzureCosmosDB/) package from NuGet manager
     > <code>Install-Package AspNetCore.Identity.Stores.AzureCosmosDB</code>
-4. In [Startup.cs](AspNetCore.Identity.Stores/SampleWebApplication/Startup.cs#L27) replace the code inside **ConfigureServices** method with the folowing code
+4. In [Startup.cs](../AspNetCore.Identity.Stores/SampleWebApplication/Startup.cs#L27) replace the code inside **ConfigureServices** method with the folowing code
     ```csharp
     using AspNetCore.Identity.Stores;
     using AspNetCore.Identity.Stores.AzureCosmosDB.Extensions;
@@ -25,7 +25,7 @@ This is how to use Azure Cosmos DB as storage for ASP.NET identity.
         
     services.AddRazorPages();
     ```  
-5. In [appsettings.json](AspNetCore.Identity.Stores/SampleWebApplication/appsettings.json) update DefaultConnection with Azure Cosmos DB connection string.
+5. In [appsettings.json](../AspNetCore.Identity.Stores/SampleWebApplication/appsettings.json) update DefaultConnection with Azure Cosmos DB connection string.
 
 ## Configuration
 As shown in the code snippet from point 4, **IdentityStoresOptions** has an extension method **UseAzureCosmosDB** to configure the connection and it has 3 parameters:
@@ -36,5 +36,5 @@ As shown in the code snippet from point 4, **IdentityStoresOptions** has an exte
 > **Note**: If the specified database or container not exist, they will get created on startup.
 
 See more:
-[Example](AspNetCore.Identity.Stores/SampleWebApplication)
-[Other storage providers](README.md)
+- [Example](../AspNetCore.Identity.Stores/SampleWebApplication)
+- [Other storage providers](../README.md)

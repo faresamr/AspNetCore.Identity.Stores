@@ -4,7 +4,7 @@ This is how to use Azure storage account as storage for ASP.NET identity.
 1. Create a new **ASP.NET Core Web App**
 2. From **Additional information** dialog select authentication type **Individual Accounts**
 3. Install [AspNetCore.Identity.Stores.AzureStorageAccount](https://www.nuget.org/packages/AspNetCore.Identity.Stores.AzureStorageAccount/) package from NuGet manager.
-4. In [Startup.cs](AspNetCore.Identity.Stores/SampleWebApplication/Startup.cs#L27) replace the code inside **ConfigureServices** method with the folowing code
+4. In [Startup.cs](../AspNetCore.Identity.Stores/SampleWebApplication/Startup.cs#L27) replace the code inside **ConfigureServices** method with the folowing code
     ```csharp
     using AspNetCore.Identity.Stores;
     using AspNetCore.Identity.Stores.AzureStorageAccount.Extensions;
@@ -24,7 +24,7 @@ This is how to use Azure storage account as storage for ASP.NET identity.
         
     services.AddRazorPages();
     ```  
-5. In [appsettings.json](AspNetCore.Identity.Stores/SampleWebApplication/appsettings.json) update DefaultConnection with Azure Storage Account connection string
+5. In [appsettings.json](../AspNetCore.Identity.Stores/SampleWebApplication/appsettings.json) update DefaultConnection with Azure Storage Account connection string
     > **_NOTE:_**  For local development you may use "UseDevelopmentStorage=true" as connection string to connect to Azure storage emulator.
 
 ## Configuration
@@ -35,5 +35,5 @@ As shown in the code snippet from point 4, **IdentityStoresOptions** has an exte
 > **Note**: If the specified table not exists, it will get created on startup.
 
 See more:
-[Example](AspNetCore.Identity.Stores/SampleWebApplication)
-[Other storage providers](README.md)
+- [Example](../AspNetCore.Identity.Stores/SampleWebApplication)
+- [Other storage providers](../README.md)
