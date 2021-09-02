@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -39,6 +40,10 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
         public Task<TRole> GetAsync(TKey roleId, CancellationToken cancellationToken)
         {
             return QueryAsync<TRole>(PartitionKey, ConvertToString(roleId), cancellationToken: cancellationToken);
+        }
+        public async Task<IEnumerable<TRole>> GetAsync(CancellationToken cancellationToken)
+        {
+            return await QueryAsync<TRole>(filter: PartitionFilter, cancellationToken: cancellationToken);
         }
 
         public async Task<TRole> GetByNormalizedNameAsync(string normalizedName, CancellationToken cancellationToken)

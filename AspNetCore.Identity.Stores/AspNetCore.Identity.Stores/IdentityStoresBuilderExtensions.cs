@@ -35,7 +35,7 @@ namespace AspNetCore.Identity.Stores
                     throw new InvalidOperationException(Resources.NotIdentityRole);
                 }
 
-                Type userStoreType = typeof(UserStore<,,,,>).MakeGenericType(builder.UserType, typeof(TUserClaim), typeof(TUserRole), typeof(TUserLogin), typeof(TUserToken));
+                Type userStoreType = typeof(UserStore<,,,,,>).MakeGenericType(builder.UserType, builder.RoleType, typeof(TUserClaim), typeof(TUserRole), typeof(TUserLogin), typeof(TUserToken));
                 
                 Type roleStoreType = typeof(RoleStore<,>).MakeGenericType(builder.RoleType, typeof(TRoleClaim));
 
