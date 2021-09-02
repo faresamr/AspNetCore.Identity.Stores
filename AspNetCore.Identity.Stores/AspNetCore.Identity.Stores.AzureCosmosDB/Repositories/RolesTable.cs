@@ -38,6 +38,10 @@ namespace AspNetCore.Identity.Stores.AzureCosmosDB.Repositories
         {
             return QueryAsync<TRole>(PartitionKey, ConvertToString(roleId), cancellationToken: cancellationToken);
         }
+        public async Task<IEnumerable<TRole>> GetAsync(CancellationToken cancellationToken)
+        {
+            return await QueryAsync<TRole>(filter: PartitionFilter, cancellationToken: cancellationToken);
+        }
 
         public async Task<TRole> GetByNormalizedNameAsync(string normalizedName, CancellationToken cancellationToken)
         {
