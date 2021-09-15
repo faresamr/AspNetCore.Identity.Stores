@@ -21,7 +21,6 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
         where TKey : IEquatable<TKey>
     {
         private const string PartitionKey = "RoleClaim";
-        private readonly string PartitionFilter = $"{nameof(TableEntity.PartitionKey)} eq '{PartitionKey}'";
 
         public RoleClaimsTable(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options) : base(dataProtectionProvider, options)
         {
@@ -39,7 +38,8 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
 
         public async Task<IList<Claim>> GetAsync(TRole role, CancellationToken cancellationToken = default)
         {
-            return (await QueryAsync<TRoleClaim>(filter: $"{PartitionFilter} and {nameof(IdentityRoleClaim<TKey>.RoleId)} eq '{role.Id}'", cancellationToken: cancellationToken)).Select(i => i.ToClaim()).ToList();
+            string filter = TableClient.CreateQueryFilter($"PartitionKey eq {PartitionKey} and RoleId eq {role.Id}");
+            return (await QueryAsync<TRoleClaim>(filter: filter, cancellationToken: cancellationToken)).Select(i => i.ToClaim()).ToList();
         }
 
         private static string GetHashKey(TRoleClaim roleClaim) => $"{roleClaim.RoleId}-{roleClaim.ClaimType}-{roleClaim.ClaimValue}".GetHashString();

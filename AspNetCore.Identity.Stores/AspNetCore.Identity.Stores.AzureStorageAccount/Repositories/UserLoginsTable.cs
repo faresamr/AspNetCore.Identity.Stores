@@ -20,7 +20,6 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
         where TKey : IEquatable<TKey>
     {
         private const string PartitionKey = "UserLogin";
-        private readonly string PartitionFilter = $"{nameof(TableEntity.PartitionKey)} eq '{PartitionKey}'";
         private readonly IUsersTable<TUser, TKey> usersTable;
 
         public UserLoginsTable(IUsersTable<TUser, TKey> usersTable, IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options) : base(dataProtectionProvider, options)
@@ -40,7 +39,8 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
 
         public async Task<IList<TUserLogin>> GetAsync(TUser user, CancellationToken cancellationToken)
         {
-            return (await QueryAsync<TUserLogin>(filter: $"{PartitionFilter} and {nameof(IdentityUserLogin<TKey>.UserId)} eq '{user.Id}'", cancellationToken: cancellationToken)).ToList();
+            string filter = TableClient.CreateQueryFilter($"PartitionKey eq {PartitionKey} and UserId eq {user.Id}");
+            return (await QueryAsync<TUserLogin>(filter: filter, cancellationToken: cancellationToken)).ToList();
         }
 
         public async Task<TUser> GetAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)

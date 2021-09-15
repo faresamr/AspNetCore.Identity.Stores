@@ -21,7 +21,6 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
         where TKey : IEquatable<TKey>
     {
         private const string PartitionKey = "UserClaim";
-        private readonly string PartitionFilter = $"{nameof(TableEntity.PartitionKey)} eq '{PartitionKey}'";
         private readonly IUsersTable<TUser, TKey> usersTable;
 
         public UserClaimsTable(IUsersTable<TUser, TKey> usersTable, IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options) : base(dataProtectionProvider, options)
@@ -41,12 +40,14 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
 
         public async Task<IList<Claim>> GetAsync(TUser user, CancellationToken cancellationToken = default)
         {
-            return (await QueryAsync<TUserClaim>(filter: $"{PartitionFilter} and {nameof(IdentityUserClaim<TKey>.UserId)} eq '{user.Id}'", cancellationToken: cancellationToken)).Select(i => i.ToClaim()).ToList();
+            string filter = TableClient.CreateQueryFilter($"PartitionKey eq {PartitionKey} and UserId eq {user.Id}");
+            return (await QueryAsync<TUserClaim>(filter: filter, cancellationToken: cancellationToken)).Select(i => i.ToClaim()).ToList();
         }
 
         public async Task<IList<TUser>> GetAsync(Claim claim, CancellationToken cancellationToken = default)
         {
-            var queryResultsFilter= await QueryAsync<TUserClaim>(filter: $"{PartitionFilter} and {nameof(IdentityUserClaim<TKey>.ClaimType)} eq '{claim.Type}' and {nameof(IdentityUserClaim<TKey>.ClaimValue)} eq '{claim.Value}'", cancellationToken: cancellationToken);
+            string filter = TableClient.CreateQueryFilter($"PartitionKey eq {PartitionKey} and ClaimType eq {claim.Type} and ClaimValue eq {claim.Value}");
+            var queryResultsFilter = await QueryAsync<TUserClaim>(filter: filter, cancellationToken: cancellationToken);
 
             List<TUser> users = new();
             foreach (TUserClaim userClaim in queryResultsFilter)
