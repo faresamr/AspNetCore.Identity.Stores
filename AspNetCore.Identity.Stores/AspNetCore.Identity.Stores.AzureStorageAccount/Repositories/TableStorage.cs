@@ -18,7 +18,7 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
         private readonly IDataProtector dataProtector;
         private readonly TableClient tableClient;
 
-        public TableStorage(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options)
+        protected TableStorage(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options)
         {
             if (options is null)
             {
@@ -39,6 +39,21 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
         protected async Task<IdentityResult> DeleteAsync(string partitionKey, string rowKey, CancellationToken cancellationToken = default)
         {
             return (await tableClient.DeleteEntityAsync(partitionKey, rowKey, cancellationToken: cancellationToken)).ToIdentityResult();
+        }
+        protected async Task DeleteBulkAsync(string filter, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(filter))
+            {
+                throw new ArgumentException($"'{nameof(filter)}' cannot be null or whitespace.", nameof(filter));
+            }
+
+            AsyncPageable<TableEntity> queryResultsFilter = tableClient.QueryAsync<TableEntity>(filter: filter, cancellationToken: cancellationToken);
+            await foreach (TableEntity tableEntity in queryResultsFilter)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                await DeleteAsync(tableEntity.PartitionKey, tableEntity.RowKey, cancellationToken);
+            }
         }
 
         protected async Task<IList<T>> QueryAsync<T>(string filter = null, CancellationToken cancellationToken = default) where T : class, new()
@@ -75,7 +90,7 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
             }
         }
 
-        public async Task<IdentityResult> UpdateAsync<T>(string partitionKey, string rowKey, T entity, CancellationToken cancellationToken) where T : class
+        protected async Task<IdentityResult> UpdateAsync<T>(string partitionKey, string rowKey, T entity, CancellationToken cancellationToken = default) where T : class
         {
             var tableEntity = entity.ToTableEntity(partitionKey, rowKey, dataProtector);
             var response = await tableClient.UpsertEntityAsync(tableEntity, cancellationToken: cancellationToken);

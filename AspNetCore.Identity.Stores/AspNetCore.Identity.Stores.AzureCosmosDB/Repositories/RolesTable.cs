@@ -16,10 +16,13 @@ namespace AspNetCore.Identity.Stores.AzureCosmosDB.Repositories
         where TKey : IEquatable<TKey>
     {
         private const string PartitionKey = "Role";
-        private readonly string PartitionFilter = $"{nameof(TableEntity.PartitionKey)} eq '{PartitionKey}'";
+        private readonly IRoleClaimsTable<TRole, TKey> roleClaimsTable;
+        private readonly IUserRolesTable<TKey> userRolesTable;
 
-        public RolesTable(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options) : base(dataProtectionProvider, options)
+        public RolesTable(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options, IRoleClaimsTable<TRole, TKey> roleClaimsTable, IUserRolesTable<TKey> userRolesTable) : base(dataProtectionProvider, options)
         {
+            this.roleClaimsTable = roleClaimsTable;
+            this.userRolesTable = userRolesTable;
         }
 
         public Task<IdentityResult> AddAsync(TRole role, CancellationToken cancellationToken)
@@ -27,12 +30,17 @@ namespace AspNetCore.Identity.Stores.AzureCosmosDB.Repositories
             return AddAsync(PartitionKey, ConvertToString(role.Id), role, cancellationToken: cancellationToken);
         }
 
-        public Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken)
+        public async Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken)
         {
-            return DeleteAsync(PartitionKey, ConvertToString(role.Id), cancellationToken: cancellationToken);
+            await Task.WhenAll(new[]
+            {
+                roleClaimsTable.DeleteRoleClaimsAsync(role, cancellationToken),
+                userRolesTable.DeleteRoleUsersAsync(role.Id, cancellationToken)
+            });
+            return await DeleteAsync(PartitionKey, ConvertToString(role.Id), cancellationToken: cancellationToken);
         }
 
-        public IQueryable<TRole> Get() => Query<TRole>().AsQueryable();
+        public IQueryable<TRole> Get() => Query<TRole>(BuildQuery(PartitionKey)).AsQueryable();
 
         public Task<TRole> GetAsync(TKey roleId, CancellationToken cancellationToken)
         {
@@ -40,13 +48,14 @@ namespace AspNetCore.Identity.Stores.AzureCosmosDB.Repositories
         }
         public async Task<IEnumerable<TRole>> GetAsync(CancellationToken cancellationToken)
         {
-            return await QueryAsync<TRole>(filter: PartitionFilter, cancellationToken: cancellationToken);
+            var qry = BuildQuery(PartitionKey);
+            return await QueryAsync<TRole>(qry, cancellationToken: cancellationToken);
         }
 
         public async Task<TRole> GetByNormalizedNameAsync(string normalizedName, CancellationToken cancellationToken)
         {
-            string qry = BuildQuery(PartitionKey, new KeyValuePair<string, object>(nameof(IdentityRole<TKey>.NormalizedName), normalizedName));
-            return (await QueryAsync<TRole>(filter: qry, cancellationToken: cancellationToken)).FirstOrDefault();
+            var qry = BuildQuery(PartitionKey, (nameof(IdentityRole<TKey>.NormalizedName), normalizedName));
+            return (await QueryAsync<TRole>(qry, cancellationToken: cancellationToken)).FirstOrDefault();
         }
 
         public Task<IdentityResult> UpdateAsync(TRole role, CancellationToken cancellationToken)

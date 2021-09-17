@@ -47,15 +47,34 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Extensions
             where TRoleClaim : IdentityRoleClaim<TKey>, new()
         {
             builder.Services.TryAddScoped(typeof(IUsersTable<,>).MakeGenericType(builder.UserType, typeof(TKey)), typeof(UsersTable<,>).MakeGenericType(builder.UserType, typeof(TKey)));
-            builder.Services.TryAddScoped(typeof(IUserClaimsTable<,,>).MakeGenericType(builder.UserType, typeof(TUserClaim), typeof(TKey)), typeof(UserClaimsTable<,,>).MakeGenericType(builder.UserType, typeof(TUserClaim), typeof(TKey)));
-            builder.Services.TryAddScoped(typeof(IUserRolesTable<,>).MakeGenericType(typeof(TUserRole), typeof(TKey)), typeof(UserRolesTable<,>).MakeGenericType(typeof(TUserRole), typeof(TKey)));
-            builder.Services.TryAddScoped(typeof(IUserLoginsTable<,,>).MakeGenericType(builder.UserType, typeof(TUserLogin), typeof(TKey)), typeof(UserLoginsTable<,,>).MakeGenericType(builder.UserType, typeof(TUserLogin), typeof(TKey)));
-            builder.Services.TryAddScoped(typeof(IUserTokensTable<,>).MakeGenericType(typeof(TUserToken), typeof(TKey)), typeof(UserTokensTable<,>).MakeGenericType(typeof(TUserToken), typeof(TKey)));
+            
+            Type userClaimsTableType = typeof(UserClaimsTable<,,>).MakeGenericType(builder.UserType, typeof(TUserClaim), typeof(TKey));
+            builder.Services.TryAddScoped(userClaimsTableType);
+            builder.Services.TryAddScoped(typeof(IUserClaimsTable<,>).MakeGenericType(builder.UserType, typeof(TKey)), i => i.GetService(userClaimsTableType));
+            builder.Services.TryAddScoped(typeof(IUserClaimsTable<,,>).MakeGenericType(builder.UserType, typeof(TUserClaim), typeof(TKey)), i => i.GetService(userClaimsTableType));
+
+            Type userRolesTableType = typeof(UserRolesTable<,>).MakeGenericType(typeof(TUserRole), typeof(TKey));
+            builder.Services.TryAddScoped(userRolesTableType);
+            builder.Services.TryAddScoped(typeof(IUserRolesTable<>).MakeGenericType(typeof(TKey)), i => i.GetService(userRolesTableType));
+            builder.Services.TryAddScoped(typeof(IUserRolesTable<,>).MakeGenericType(typeof(TUserRole), typeof(TKey)), i => i.GetService(userRolesTableType));
+
+            Type userLoginsTableType = typeof(UserLoginsTable<,,>).MakeGenericType(builder.UserType, typeof(TUserLogin), typeof(TKey));
+            builder.Services.TryAddScoped(userLoginsTableType);
+            builder.Services.TryAddScoped(typeof(IUserLoginsTable<,>).MakeGenericType(builder.UserType, typeof(TKey)), i => i.GetService(userLoginsTableType));
+            builder.Services.TryAddScoped(typeof(IUserLoginsTable<,,>).MakeGenericType(builder.UserType, typeof(TUserLogin), typeof(TKey)), i => i.GetService(userLoginsTableType));
+
+            Type userTokensTableType = typeof(UserTokensTable<,>).MakeGenericType(typeof(TUserToken), typeof(TKey));
+            builder.Services.TryAddScoped(userTokensTableType);
+            builder.Services.TryAddScoped(typeof(IUserTokensTable<>).MakeGenericType(typeof(TKey)), i => i.GetService(userTokensTableType));
+            builder.Services.TryAddScoped(typeof(IUserTokensTable<,>).MakeGenericType(typeof(TUserToken), typeof(TKey)), i => i.GetService(userTokensTableType));
 
             if (builder.RoleType is not null)
             {
                 builder.Services.TryAddScoped(typeof(IRolesTable<,>).MakeGenericType(builder.RoleType, typeof(TKey)), typeof(RolesTable<,>).MakeGenericType(builder.RoleType, typeof(TKey)));
-                builder.Services.TryAddScoped(typeof(IRoleClaimsTable<,,>).MakeGenericType(builder.RoleType, typeof(TRoleClaim), typeof(TKey)), typeof(RoleClaimsTable<,,>).MakeGenericType(builder.RoleType, typeof(TRoleClaim), typeof(TKey)));
+                Type roleClaimsTableType = typeof(RoleClaimsTable<,,>).MakeGenericType(builder.RoleType, typeof(TRoleClaim), typeof(TKey));
+                builder.Services.TryAddScoped(roleClaimsTableType);
+                builder.Services.TryAddScoped(typeof(IRoleClaimsTable<,,>).MakeGenericType(builder.RoleType, typeof(TRoleClaim), typeof(TKey)), i => i.GetService(roleClaimsTableType));
+                builder.Services.TryAddScoped(typeof(IRoleClaimsTable<,>).MakeGenericType(builder.RoleType, typeof(TKey)), i => i.GetService(roleClaimsTableType));
             }
         }
     }

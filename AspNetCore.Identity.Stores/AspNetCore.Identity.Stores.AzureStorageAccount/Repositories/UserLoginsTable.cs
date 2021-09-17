@@ -20,11 +20,9 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
         where TKey : IEquatable<TKey>
     {
         private const string PartitionKey = "UserLogin";
-        private readonly IUsersTable<TUser, TKey> usersTable;
 
-        public UserLoginsTable(IUsersTable<TUser, TKey> usersTable, IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options) : base(dataProtectionProvider, options)
+        public UserLoginsTable(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options) : base(dataProtectionProvider, options)
         {
-            this.usersTable = usersTable ?? throw new ArgumentNullException(nameof(usersTable));
         }
 
         public Task<IdentityResult> AddAsync(TUserLogin userLogin, CancellationToken cancellationToken)
@@ -47,9 +45,15 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
         {
             var userLogin = await QueryAsync<TUserLogin>(PartitionKey, GetHashKey(loginProvider, providerKey), cancellationToken: cancellationToken);
             if (userLogin is not null)
-                return await usersTable.GetAsync(userLogin.UserId, cancellationToken);
+                return await QueryAsync<TUser>(UsersTable<TUser,TKey>.PartitionKey, ConvertToString(userLogin.UserId), cancellationToken: cancellationToken);
             else
                 return null;
+        }
+
+        public Task DeleteUserLoginsAsync(TUser user, CancellationToken cancellationToken)
+        {
+            string filter = TableClient.CreateQueryFilter($"PartitionKey eq {PartitionKey} and UserId eq {user.Id}");
+            return DeleteBulkAsync(filter, cancellationToken);
         }
 
         private static string GetHashKey(TUserLogin userLogin) => GetHashKey(userLogin.LoginProvider, userLogin.ProviderKey);

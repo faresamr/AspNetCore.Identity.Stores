@@ -42,6 +42,12 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
             return (await QueryAsync<TRoleClaim>(filter: filter, cancellationToken: cancellationToken)).Select(i => i.ToClaim()).ToList();
         }
 
+        public Task DeleteRoleClaimsAsync(TRole role, CancellationToken cancellationToken)
+        {
+            string filter = TableClient.CreateQueryFilter($"PartitionKey eq {PartitionKey} and RoleId eq {role.Id}");
+            return DeleteBulkAsync(filter, cancellationToken);
+        }
+
         private static string GetHashKey(TRoleClaim roleClaim) => $"{roleClaim.RoleId}-{roleClaim.ClaimType}-{roleClaim.ClaimValue}".GetHashString();
     }
 }

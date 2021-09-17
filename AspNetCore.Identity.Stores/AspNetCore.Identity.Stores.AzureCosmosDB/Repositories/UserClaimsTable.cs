@@ -18,12 +18,9 @@ namespace AspNetCore.Identity.Stores.AzureCosmosDB.Repositories
         where TKey : IEquatable<TKey>
     {
         private const string PartitionKey = "UserClaim";
-        private readonly string PartitionFilter = $"{nameof(TableEntity.PartitionKey)} eq '{PartitionKey}'";
-        private readonly IUsersTable<TUser, TKey> usersTable;
 
-        public UserClaimsTable(IUsersTable<TUser, TKey> usersTable, IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options) : base(dataProtectionProvider, options)
+        public UserClaimsTable(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options) : base(dataProtectionProvider, options)
         {
-            this.usersTable = usersTable ?? throw new ArgumentNullException(nameof(usersTable));
         }
 
         public Task<IdentityResult> AddAsync(TUserClaim userClaim, CancellationToken cancellationToken = default)
@@ -38,27 +35,33 @@ namespace AspNetCore.Identity.Stores.AzureCosmosDB.Repositories
 
         public async Task<IList<Claim>> GetAsync(TUser user, CancellationToken cancellationToken = default)
         {
-            string qry = BuildQuery(PartitionKey, new KeyValuePair<string, object>(nameof(IdentityUserClaim<TKey>.UserId), user.Id));
-            return (await QueryAsync<TUserClaim>(filter: qry, cancellationToken: cancellationToken)).Select(i => i.ToClaim()).ToList();
+            var qry = BuildQuery(PartitionKey, (nameof(IdentityUserClaim<TKey>.UserId), user.Id));
+            return (await QueryAsync<TUserClaim>(qry, cancellationToken: cancellationToken)).Select(i => i.ToClaim()).ToList();
         }
 
         public async Task<IList<TUser>> GetAsync(Claim claim, CancellationToken cancellationToken = default)
         {
-            string qry = BuildQuery(PartitionKey,
-                new KeyValuePair<string, object>(nameof(IdentityUserClaim<TKey>.ClaimType), claim.Type),
-                new KeyValuePair<string, object>(nameof(IdentityUserClaim<TKey>.ClaimValue), claim.Value));
-            var queryResultsFilter = await QueryAsync<TUserClaim>(filter: qry, cancellationToken: cancellationToken);
+            var qry = BuildQuery(PartitionKey,
+                (nameof(IdentityUserClaim<TKey>.ClaimType), claim.Type),
+                (nameof(IdentityUserClaim<TKey>.ClaimValue), claim.Value));
+            var queryResultsFilter = await QueryAsync<TUserClaim>(qry, cancellationToken: cancellationToken);
 
             List<TUser> users = new();
             foreach (TUserClaim userClaim in queryResultsFilter)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                users.Add(await usersTable.GetAsync(userClaim.UserId, cancellationToken));
+                users.Add(await QueryAsync<TUser>(UsersTable<TUser, TKey>.PartitionKey, ConvertToString(userClaim.UserId), cancellationToken: cancellationToken));
             }
             return users;
         }
 
         private static string GetHashKey(TUserClaim userClaim) => $"{userClaim.UserId}-{userClaim.ClaimType}-{userClaim.ClaimValue}".GetHashString();
+
+        public Task DeleteUserClaimsAsync(TUser user, CancellationToken cancellationToken)
+        {
+            var qry = BuildQuery(PartitionKey, (nameof(IdentityUserClaim<TKey>.UserId), user.Id));
+            return DeleteBulkAsync(qry, cancellationToken);
+        }
     }
 }

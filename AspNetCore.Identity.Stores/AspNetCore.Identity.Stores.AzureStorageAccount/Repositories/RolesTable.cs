@@ -20,9 +20,13 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
     {
         private const string PartitionKey = "Role";
         private readonly string PartitionFilter = TableClient.CreateQueryFilter($"PartitionKey eq {PartitionKey}");
+        private readonly IRoleClaimsTable<TRole, TKey> roleClaimsTable;
+        private readonly IUserRolesTable<TKey> userRolesTable;
 
-        public RolesTable(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options) : base(dataProtectionProvider, options)
+        public RolesTable(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options, IRoleClaimsTable<TRole, TKey> roleClaimsTable, IUserRolesTable<TKey> userRolesTable) : base(dataProtectionProvider, options)
         {
+            this.roleClaimsTable = roleClaimsTable;
+            this.userRolesTable = userRolesTable;
         }
 
         public Task<IdentityResult> AddAsync(TRole role, CancellationToken cancellationToken)
@@ -30,9 +34,14 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
             return AddAsync(PartitionKey, ConvertToString(role.Id), role, cancellationToken: cancellationToken);
         }
 
-        public Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken)
+        public async Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken)
         {
-            return DeleteAsync(PartitionKey, ConvertToString(role.Id), cancellationToken: cancellationToken);
+            await Task.WhenAll(new []
+            {
+                roleClaimsTable.DeleteRoleClaimsAsync(role, cancellationToken),
+                userRolesTable.DeleteRoleUsersAsync(role.Id, cancellationToken)
+            });
+            return await DeleteAsync(PartitionKey, ConvertToString(role.Id), cancellationToken: cancellationToken);
         }
 
         public IQueryable<TRole> Get() => Query<TRole>(PartitionFilter).AsQueryable();

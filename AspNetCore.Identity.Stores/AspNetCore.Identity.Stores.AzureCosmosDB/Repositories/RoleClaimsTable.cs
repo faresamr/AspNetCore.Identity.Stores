@@ -19,7 +19,6 @@ namespace AspNetCore.Identity.Stores.AzureCosmosDB.Repositories
         where TKey : IEquatable<TKey>
     {
         private const string PartitionKey = "RoleClaim";
-        private readonly string PartitionFilter = $"{nameof(TableEntity.PartitionKey)} eq '{PartitionKey}'";
 
         public RoleClaimsTable(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options) : base(dataProtectionProvider, options)
         {
@@ -37,10 +36,16 @@ namespace AspNetCore.Identity.Stores.AzureCosmosDB.Repositories
 
         public async Task<IList<Claim>> GetAsync(TRole role, CancellationToken cancellationToken = default)
         {
-            string qry = BuildQuery(PartitionKey, new KeyValuePair<string, object>(nameof(IdentityRoleClaim<TKey>.RoleId), role.Id));
-            return (await QueryAsync<TRoleClaim>(filter: qry, cancellationToken: cancellationToken)).Select(i => i.ToClaim()).ToList();
+            var qry = BuildQuery(PartitionKey, (nameof(IdentityRoleClaim<TKey>.RoleId), role.Id));
+            return (await QueryAsync<TRoleClaim>(qry, cancellationToken: cancellationToken)).Select(i => i.ToClaim()).ToList();
         }
 
         private static string GetHashKey(TRoleClaim roleClaim) => $"{roleClaim.RoleId}-{roleClaim.ClaimType}-{roleClaim.ClaimValue}".GetHashString();
+
+        public Task DeleteRoleClaimsAsync(TRole role, CancellationToken cancellationToken)
+        {
+            var qry = BuildQuery(PartitionKey, (nameof(IdentityRoleClaim<TKey>.RoleId), role.Id));
+            return DeleteBulkAsync(qry, cancellationToken);
+        }
     }
 }

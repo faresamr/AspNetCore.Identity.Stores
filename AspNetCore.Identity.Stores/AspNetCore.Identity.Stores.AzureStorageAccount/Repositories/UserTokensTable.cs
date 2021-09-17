@@ -44,6 +44,12 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
             return QueryAsync<TUserToken>(filter: filter, cancellationToken: cancellationToken);
         }
 
+        public Task DeleteUserTokensAsync(TKey userId, CancellationToken cancellationToken)
+        {
+            string filter = TableClient.CreateQueryFilter($"PartitionKey eq {PartitionKey} and UserId eq {userId}");
+            return DeleteBulkAsync(filter, cancellationToken);
+        }
+
         private static string GetHashKey(TUserToken userToken) => GetHashKey(userToken.UserId, userToken.LoginProvider, userToken.Name);
         private static string GetHashKey(TKey userId, string loginProvider, string name) => $"{userId}-{loginProvider}-{name}".GetHashString();
     }

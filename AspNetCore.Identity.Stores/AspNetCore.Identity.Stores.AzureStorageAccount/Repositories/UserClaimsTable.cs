@@ -21,11 +21,9 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
         where TKey : IEquatable<TKey>
     {
         private const string PartitionKey = "UserClaim";
-        private readonly IUsersTable<TUser, TKey> usersTable;
 
-        public UserClaimsTable(IUsersTable<TUser, TKey> usersTable, IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options) : base(dataProtectionProvider, options)
+        public UserClaimsTable(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options) : base(dataProtectionProvider, options)
         {
-            this.usersTable = usersTable ?? throw new ArgumentNullException(nameof(usersTable));
         }
 
         public Task<IdentityResult> AddAsync(TUserClaim userClaim, CancellationToken cancellationToken = default)
@@ -54,9 +52,15 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                users.Add(await usersTable.GetAsync(userClaim.UserId, cancellationToken));
+                users.Add(await QueryAsync<TUser>(UsersTable<TUser, TKey>.PartitionKey, ConvertToString(userClaim.UserId), cancellationToken: cancellationToken));
             }
             return users;
+        }
+
+        public Task DeleteUserClaimsAsync(TUser user, CancellationToken cancellationToken)
+        {
+            string filter = TableClient.CreateQueryFilter($"PartitionKey eq {PartitionKey} and UserId eq {user.Id}");
+            return DeleteBulkAsync(filter, cancellationToken);
         }
 
         private static string GetHashKey(TUserClaim userClaim) => $"{userClaim.UserId}-{userClaim.ClaimType}-{userClaim.ClaimValue}".GetHashString();
