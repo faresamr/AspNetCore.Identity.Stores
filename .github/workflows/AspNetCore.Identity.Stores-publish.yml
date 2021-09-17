@@ -20,7 +20,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore AspNetCore.Identity.Stores/AspNetCore.Identity.Stores
     - name: Build
-      run: dotnet build --no-restore AspNetCore.Identity.Stores/AspNetCore.Identity.Stores
+      run: dotnet build --configuration Release --no-restore AspNetCore.Identity.Stores/AspNetCore.Identity.Stores
     - name: Test
       run: dotnet test --no-build --verbosity normal AspNetCore.Identity.Stores/AspNetCore.Identity.Stores
     - name: Publish AspNetCore.Identity.Stores
