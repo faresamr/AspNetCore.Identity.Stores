@@ -19,7 +19,6 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
         where TKey : IEquatable<TKey>
     {
         private const string PartitionKey = "UserRole";
-        private readonly string PartitionFilter = $"{nameof(TableEntity.PartitionKey)} eq '{PartitionKey}'";
 
         public UserRolesTable(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options) : base(dataProtectionProvider, options)
         {
@@ -37,12 +36,25 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
 
         public async Task<IList<TUserRole>> GetUsersAsync(TKey roleId, CancellationToken cancellationToken)
         {
-            return (await QueryAsync<TUserRole>(filter: $"{PartitionFilter} and {nameof(IdentityUserRole<TKey>.RoleId)} eq '{roleId}'", cancellationToken: cancellationToken)).ToList();
+            string filter = TableClient.CreateQueryFilter($"PartitionKey eq {PartitionKey} and RoleId eq {roleId}");
+            return (await QueryAsync<TUserRole>(filter: filter, cancellationToken: cancellationToken)).ToList();
         }
 
         public async Task<IList<TUserRole>> GetRolesAsync(TKey userId, CancellationToken cancellationToken)
         {
-            return (await QueryAsync<TUserRole>(filter: $"{PartitionFilter} and {nameof(IdentityUserRole<TKey>.UserId)} eq '{userId}'", cancellationToken: cancellationToken)).ToList();
+            string filter = TableClient.CreateQueryFilter($"PartitionKey eq {PartitionKey} and UserId eq {userId}");
+            return (await QueryAsync<TUserRole>(filter: filter, cancellationToken: cancellationToken)).ToList();
+        }
+
+        public Task DeleteUserRolesAsync(TKey userId, CancellationToken cancellationToken)
+        {
+            string filter = TableClient.CreateQueryFilter($"PartitionKey eq {PartitionKey} and UserId eq {userId}");
+            return DeleteBulkAsync(filter, cancellationToken);
+        }
+        public Task DeleteRoleUsersAsync(TKey roleId, CancellationToken cancellationToken)
+        {
+            string filter = TableClient.CreateQueryFilter($"PartitionKey eq {PartitionKey} and RoleId eq {roleId}");
+            return DeleteBulkAsync(filter, cancellationToken);
         }
 
         private static string GetHashKey(TUserRole userRole) => GetHashKey(userRole.UserId, userRole.RoleId);

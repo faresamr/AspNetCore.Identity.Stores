@@ -16,7 +16,6 @@ namespace AspNetCore.Identity.Stores.AzureCosmosDB.Repositories
         where TKey : IEquatable<TKey>
     {
         private const string PartitionKey = "UserRole";
-        private readonly string PartitionFilter = $"{nameof(TableEntity.PartitionKey)} eq '{PartitionKey}'";
 
         public UserRolesTable(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options) : base(dataProtectionProvider, options)
         {
@@ -34,17 +33,29 @@ namespace AspNetCore.Identity.Stores.AzureCosmosDB.Repositories
 
         public async Task<IList<TUserRole>> GetUsersAsync(TKey roleId, CancellationToken cancellationToken)
         {
-            string qry = BuildQuery(PartitionKey, new KeyValuePair<string, object>(nameof(IdentityUserRole<TKey>.RoleId), roleId));
-            return (await QueryAsync<TUserRole>(filter: qry, cancellationToken: cancellationToken)).ToList();
+            var qry = BuildQuery(PartitionKey, (nameof(IdentityUserRole<TKey>.RoleId), roleId));
+            return (await QueryAsync<TUserRole>(qry, cancellationToken: cancellationToken)).ToList();
         }
 
         public async Task<IList<TUserRole>> GetRolesAsync(TKey userId, CancellationToken cancellationToken)
         {
-            string qry = BuildQuery(PartitionKey, new KeyValuePair<string, object>(nameof(IdentityUserRole<TKey>.UserId), userId));
-            return (await QueryAsync<TUserRole>(filter: qry, cancellationToken: cancellationToken)).ToList();
+            var qry = BuildQuery(PartitionKey, (nameof(IdentityUserRole<TKey>.UserId), userId));
+            return (await QueryAsync<TUserRole>(qry, cancellationToken: cancellationToken)).ToList();
         }
 
         private static string GetHashKey(TUserRole userRole) => GetHashKey(userRole.UserId, userRole.RoleId);
         private static string GetHashKey(TKey userId, TKey roleId) => $"{userId}-{roleId}".GetHashString();
+
+        public Task DeleteUserRolesAsync(TKey userId, CancellationToken cancellationToken)
+        {
+            var qry = BuildQuery(PartitionKey, (nameof(IdentityUserRole<TKey>.UserId), userId));
+            return DeleteBulkAsync(qry, cancellationToken);
+        }
+
+        public Task DeleteRoleUsersAsync(TKey roleId, CancellationToken cancellationToken)
+        {
+            var qry = BuildQuery(PartitionKey, (nameof(IdentityUserRole<TKey>.RoleId), roleId));
+            return DeleteBulkAsync(qry, cancellationToken);
+        }
     }
 }

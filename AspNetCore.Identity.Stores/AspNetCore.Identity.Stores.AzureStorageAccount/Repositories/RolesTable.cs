@@ -19,10 +19,14 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
         where TKey : IEquatable<TKey>
     {
         private const string PartitionKey = "Role";
-        private readonly string PartitionFilter = $"{nameof(TableEntity.PartitionKey)} eq '{PartitionKey}'";
+        private readonly string PartitionFilter = TableClient.CreateQueryFilter($"PartitionKey eq {PartitionKey}");
+        private readonly IRoleClaimsTable<TRole, TKey> roleClaimsTable;
+        private readonly IUserRolesTable<TKey> userRolesTable;
 
-        public RolesTable(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options) : base(dataProtectionProvider, options)
+        public RolesTable(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options, IRoleClaimsTable<TRole, TKey> roleClaimsTable, IUserRolesTable<TKey> userRolesTable) : base(dataProtectionProvider, options)
         {
+            this.roleClaimsTable = roleClaimsTable;
+            this.userRolesTable = userRolesTable;
         }
 
         public Task<IdentityResult> AddAsync(TRole role, CancellationToken cancellationToken)
@@ -30,12 +34,17 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
             return AddAsync(PartitionKey, ConvertToString(role.Id), role, cancellationToken: cancellationToken);
         }
 
-        public Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken)
+        public async Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken)
         {
-            return DeleteAsync(PartitionKey, ConvertToString(role.Id), cancellationToken: cancellationToken);
+            await Task.WhenAll(new []
+            {
+                roleClaimsTable.DeleteRoleClaimsAsync(role, cancellationToken),
+                userRolesTable.DeleteRoleUsersAsync(role.Id, cancellationToken)
+            });
+            return await DeleteAsync(PartitionKey, ConvertToString(role.Id), cancellationToken: cancellationToken);
         }
 
-        public IQueryable<TRole> Get() => Query<TRole>().AsQueryable();
+        public IQueryable<TRole> Get() => Query<TRole>(PartitionFilter).AsQueryable();
 
         public Task<TRole> GetAsync(TKey roleId, CancellationToken cancellationToken)
         {
@@ -48,7 +57,8 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
 
         public async Task<TRole> GetByNormalizedNameAsync(string normalizedName, CancellationToken cancellationToken)
         {
-            return (await QueryAsync<TRole>(filter: $"{PartitionFilter} and {nameof(IdentityRole<TKey>.NormalizedName)} eq '{normalizedName}'", cancellationToken: cancellationToken)).FirstOrDefault();
+            string filter = TableClient.CreateQueryFilter($"PartitionKey eq {PartitionKey} and NormalizedName eq {normalizedName}");
+            return (await QueryAsync<TRole>(filter: filter, cancellationToken: cancellationToken)).FirstOrDefault();
         }
 
         public Task<IdentityResult> UpdateAsync(TRole role, CancellationToken cancellationToken)

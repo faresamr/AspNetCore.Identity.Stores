@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace AspNetCore.Identity.Stores.Shared.Extensions
 {
@@ -9,10 +12,11 @@ namespace AspNetCore.Identity.Stores.Shared.Extensions
             if (string.IsNullOrEmpty(value))
                 return string.Empty;
 
-            using var sha = new System.Security.Cryptography.SHA256Managed();
-            byte[] textData = System.Text.Encoding.UTF8.GetBytes(value);
-            byte[] hash = sha.ComputeHash(textData);
-            return BitConverter.ToString(hash);
+            string rawKeyData = value;
+            using MD5 md5 = MD5.Create();
+            byte[] inputBytes = Encoding.UTF8.GetBytes(rawKeyData);
+            byte[] hashBytes = md5.ComputeHash(inputBytes);
+            return string.Join(string.Empty, hashBytes.Select(i => i.ToString("X2")));
         }
     }
 }

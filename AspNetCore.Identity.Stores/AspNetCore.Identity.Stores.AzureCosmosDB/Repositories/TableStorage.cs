@@ -17,7 +17,6 @@ namespace AspNetCore.Identity.Stores.AzureCosmosDB.Repositories
 {
     internal abstract class TableStorage
     {
-        internal const string IdentityTable = "Identity";
         private readonly IDataProtector dataProtector;
         private readonly Container container;
 
@@ -62,12 +61,31 @@ namespace AspNetCore.Identity.Stores.AzureCosmosDB.Repositories
                 return IdentityResult.Failed(new IdentityError { Code = ex.StatusCode.ToString(), Description = ex.Message });
             }
         }
+        protected async Task DeleteBulkAsync(QueryDefinition queryDefinition, CancellationToken cancellationToken = default)
+        {
+            if (queryDefinition is null)
+            {
+                throw new ArgumentNullException(nameof(queryDefinition));
+            }
 
-        protected async Task<IList<T>> QueryAsync<T>(string filter = null, CancellationToken cancellationToken = default) where T : class, new()
+            FeedIterator<TableEntity> queryResultSetIterator = container.GetItemQueryIterator<TableEntity>(queryDefinition);
+
+            while (queryResultSetIterator.HasMoreResults)
+            {
+                FeedResponse<TableEntity> currentResultSet = await queryResultSetIterator.ReadNextAsync(cancellationToken);
+                foreach (TableEntity entity in currentResultSet)
+                {
+                    string partitionKey = entity[TableEntity.PartitionKey] as string;
+                    string id = entity[TableEntity.Id] as string;
+                    await DeleteAsync(partitionKey, id, cancellationToken);
+                }
+            }
+        }
+
+        protected async Task<IList<T>> QueryAsync<T>(QueryDefinition queryDefinition = null, CancellationToken cancellationToken = default) where T : class, new()
         {
             try
             {
-                QueryDefinition queryDefinition = new(filter);
                 FeedIterator<TableEntity> queryResultSetIterator = container.GetItemQueryIterator<TableEntity>(queryDefinition);
 
                 List<T> entities = new();
@@ -87,9 +105,9 @@ namespace AspNetCore.Identity.Stores.AzureCosmosDB.Repositories
                 return Enumerable.Empty<T>().ToList();;
             }
         }
-        protected IEnumerable<T> Query<T>(string filter = null, CancellationToken cancellationToken = default) where T : class, new()
+        protected IEnumerable<T> Query<T>(QueryDefinition queryDefinition = null, CancellationToken cancellationToken = default) where T : class, new()
         {
-            return QueryAsync<T>(filter, cancellationToken).Result;
+            return QueryAsync<T>(queryDefinition, cancellationToken).Result;
         }
 
         protected async Task<T> QueryAsync<T>(string partitionKey, string rowKey, CancellationToken cancellationToken = default) where T : class, new()
@@ -108,18 +126,28 @@ namespace AspNetCore.Identity.Stores.AzureCosmosDB.Repositories
             }
         }
 
-        protected static string BuildQuery(string partitionKey, params KeyValuePair<string, object>[] filters)
+        protected static QueryDefinition BuildQuery(string partitionKey, params (string Name, object Value)[] filters)
         {
             StringBuilder stringBuilder = new();
-            stringBuilder.Append("SELECT * FROM c WHERE c.").Append(TableEntity.PartitionKey).Append('=').Append('\'').Append(partitionKey).Append('\'');
+            stringBuilder.Append("SELECT * FROM c WHERE c.").Append(TableEntity.PartitionKey).Append('=').Append("@PartitionKey");
             if (filters.Any())
             {
                 foreach (var keyValue in filters)
                 {
-                    stringBuilder.Append(" AND c.").Append(keyValue.Key).Append('=').Append('\'').Append(keyValue.Value).Append('\'');
+                    stringBuilder.Append(" AND c.").Append(keyValue.Name).Append('=').Append('@').Append(keyValue.Name);
                 }
             }
-            return stringBuilder.ToString();
+            QueryDefinition queryDefinition = new(stringBuilder.ToString());
+            queryDefinition.WithParameter("@PartitionKey", partitionKey);
+            if (filters.Any())
+            {
+                foreach (var keyValue in filters)
+                {
+                    queryDefinition.WithParameter($"@{keyValue.Name}", keyValue.Value);
+                }
+            }
+
+            return queryDefinition;
         }
 
         public async Task<IdentityResult> UpdateAsync<T>(string partitionKey, string rowKey, T entity, CancellationToken cancellationToken) where T : class
