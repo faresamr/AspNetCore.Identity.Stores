@@ -9,7 +9,7 @@
     <PackageTags>AspNetCore;Identity;IdentityStore;AzureStorageAccount;AzureTableStorage</PackageTags>
     <Description>ASP.NET Core Identity provider that uses Microsoft Azure Storage Account.</Description>
     <Company />
-    <Version>1.0.3</Version>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

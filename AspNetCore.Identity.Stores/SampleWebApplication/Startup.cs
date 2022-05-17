@@ -81,6 +81,17 @@ namespace SampleWebApplication
             {
                 endpoints.MapRazorPages();
             });
+
+            // Seed identity
+            app.UseIdentitySeeding<IdentityUser, IdentityRole>(i =>
+            {
+                i.AddRole(new IdentityRole("Admin"))
+                    .AddRole(new IdentityRole("User"))
+                    .AddUser(new() { Email = "admin@sample.com", UserName = "admin@sample.com" }, "adminP@ssw0rd!", roles: new IdentityRole("Admin"))
+                    .AddUser(new() { Email = "user@sample.com", UserName = "user@sample.com" }, "userP@ssw0rd!", roles: new IdentityRole("User"));
+
+                //Note: Username should be provided as its a required field in identity framework, and password should meet identity password requirements
+            });
         }
     }
 }
