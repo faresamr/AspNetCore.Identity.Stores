@@ -11,7 +11,6 @@
 		<PackageTags>AspNetCore;Identity;IdentityStore;CosmosDB</PackageTags>
 		<Description>ASP.NET Core Identity provider that uses Microsoft Azure CosmosDB.</Description>
 		<Company />
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Version>2.0.0</Version>
 		<Nullable>enable</Nullable>
 		<WarningsAsErrors>CS8600;CS8602;CS8603;CS8604;CS8605;CS8613;CS8619;CS8625;IDE0059</WarningsAsErrors>
