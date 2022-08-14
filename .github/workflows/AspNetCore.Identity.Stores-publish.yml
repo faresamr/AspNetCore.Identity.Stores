@@ -6,17 +6,22 @@ on:
     
 jobs:
   build:
+
     runs-on: ubuntu-latest
+
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v1
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore AspNetCore.Identity.Stores/AspNetCore.Identity.Stores.sln
     - name: Build
-      run: dotnet build -c Release
+      run: dotnet build --no-restore AspNetCore.Identity.Stores/AspNetCore.Identity.Stores.sln
     - name: Test
-      run: dotnet test -c Release --no-build
+      run: dotnet test --no-build --verbosity normal AspNetCore.Identity.Stores/AspNetCore.Identity.Stores.sln
     - name: Pack nugets
-      run: dotnet pack -c Release --no-build --output .
+      run: dotnet pack AspNetCore.Identity.Stores/AspNetCore.Identity.Stores.sln -c Release --no-build --output .
     - name: Push to NuGet
       run: dotnet nuget push "*.nupkg" --api-key ${{secrets.NUGET}} --source "github"
