@@ -1,5 +1,5 @@
-#define AzureCosmosDB
-//#define AzureStorageAccount
+//#define AzureCosmosDB
+#define AzureStorageAccount
 
 using AspNetCore.Identity.Stores;
 using AspNetCore.Identity.Stores.AzureCosmosDB.Extensions;
