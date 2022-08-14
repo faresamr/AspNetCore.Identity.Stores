@@ -59,13 +59,16 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 
+// Seed identity
 app.UseIdentitySeeding<IdentityUser, IdentityRole>(seeds =>
 {
-    seeds.AddUser(new("user@a.com") {Email= "user@a.com", EmailConfirmed = true }, "P@ssw0rd!");
-    seeds.AddUser(new("admin1@a.com") { Email = "admin1@a.com", EmailConfirmed = true }, "P@ssw0rd!",new IdentityRole("Admin"));
-    seeds.AddUser(new("admin2@a.com") { Email = "admin2@a.com", EmailConfirmed = true }, "P@ssw0rd!", new System.Security.Claims.Claim("AdminClaim", "true"));
-    seeds.AddRole(new("Sales"), new System.Security.Claims.Claim("SalesManager", "true"));
-    seeds.AddRole(new("Guest"));
+    seeds
+        .AddRole(role: new IdentityRole("Admin"))
+        .AddRole(role: new IdentityRole("User"))
+        .AddUser(user: new() { Email = "admin@sample.com", UserName = "admin@sample.com", EmailConfirmed = true }, password: "adminP@ssw0rd!", roles: new IdentityRole("Admin"))
+        .AddUser(user: new() { Email = "user@sample.com", UserName = "user@sample.com", EmailConfirmed = true }, password: "userP@ssw0rd!", roles: new IdentityRole("User"));
+
+    //Note: Username should be provided as its a required field in identity framework and email should be marked as confirmed to allow login, also password should meet identity password requirements
 });
 
 app.Run();
