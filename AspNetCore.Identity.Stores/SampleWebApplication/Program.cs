@@ -1,5 +1,5 @@
-#define AzureCosmosDB
-//#define AzureStorageAccount
+//#define AzureCosmosDB
+#define AzureStorageAccount
 
 using AspNetCore.Identity.Stores;
 using AspNetCore.Identity.Stores.AzureCosmosDB.Extensions;
@@ -68,7 +68,7 @@ app.UseIdentitySeeding<IdentityUser, IdentityRole>(seeds =>
         .AddUser(user: new() { Email = "admin@sample.com", UserName = "admin@sample.com", EmailConfirmed = true }, password: "adminP@ssw0rd!", roles: new IdentityRole("Admin"))
         .AddUser(user: new() { Email = "user@sample.com", UserName = "user@sample.com", EmailConfirmed = true }, password: "userP@ssw0rd!", roles: new IdentityRole("User"));
 
-    //Note: Username should be provided as its a required field in identity framework and email should be marked as confirmed to allow login, also password should meet identity password requirements
+    // Note: Username should be provided as its a required field in identity framework and email should be marked as confirmed to allow login, also password should meet identity password requirements
 });
 
 app.Run();
