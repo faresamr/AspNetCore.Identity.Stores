@@ -22,8 +22,8 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal AspNetCore.Identity.Stores/AspNetCore.Identity.Stores.sln
     - name: Add Source
-      run: dotnet nuget add source --username faresamr --password ${{ secrets.PACKAGES_GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/faresamr/index.json"
+      run: dotnet nuget add source --username faresamr --password ${{ secrets.NUGET }} --store-password-in-clear-text --name NUGET "https://api.nuget.org"
     - name: Pack nugets
       run: dotnet pack AspNetCore.Identity.Stores/AspNetCore.Identity.Stores.sln -c Release --no-build --output .
     - name: Push to NuGet
-      run: dotnet nuget push "*.nupkg" --api-key ${{secrets.PACKAGES_GITHUB_TOKEN}} --source "github"
+      run: dotnet nuget push "*.nupkg" --api-key ${{secrets.NUGET}} --source "NUGET"
