@@ -2,7 +2,11 @@ name: AspNetCore.Identity.Stores-CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
+    paths:
+      - AspNetCore.Identity.Stores/**
+  pull_request:
+    branches: [ "main" ]
     paths:
       - AspNetCore.Identity.Stores/**
 
@@ -12,14 +16,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Setup .NET
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v2
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
       run: dotnet restore AspNetCore.Identity.Stores/AspNetCore.Identity.Stores.sln
     - name: Build
-      run: dotnet build --configuration Release --no-restore AspNetCore.Identity.Stores/AspNetCore.Identity.Stores.sln
+      run: dotnet build --no-restore AspNetCore.Identity.Stores/AspNetCore.Identity.Stores.sln
     - name: Test
       run: dotnet test --no-build --verbosity normal AspNetCore.Identity.Stores/AspNetCore.Identity.Stores.sln
