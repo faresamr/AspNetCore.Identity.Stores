@@ -1,7 +1,6 @@
-﻿namespace AspNetCore.Identity.Stores
+﻿namespace AspNetCore.Identity.Stores;
+
+public sealed class IdentityStoresOptions
 {
-    public sealed class IdentityStoresOptions
-    {
-        
-    }
+    
 }

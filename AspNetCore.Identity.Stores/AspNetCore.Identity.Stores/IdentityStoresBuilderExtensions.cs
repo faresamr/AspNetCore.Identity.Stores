@@ -1,68 +1,60 @@
 ﻿using AspNetCore.Identity.Stores.Properties;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
 
-namespace AspNetCore.Identity.Stores
+namespace AspNetCore.Identity.Stores;
+
+public static class IdentityStoresBuilderExtensions
 {
-    public static class IdentityStoresBuilderExtensions
+    public static void AddStores<TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim>(this IdentityBuilder builder)
+        where TUserClaim : IdentityUserClaim<string>, new()
+        where TUserRole : IdentityUserRole<string>, new()
+        where TUserLogin : IdentityUserLogin<string>, new()
+        where TUserToken : IdentityUserToken<string>, new()
+        where TRoleClaim : IdentityRoleClaim<string>, new()
     {
-        public static void AddStores<TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim>(this IdentityBuilder builder)
-            where TUserClaim : IdentityUserClaim<string>, new()
-            where TUserRole : IdentityUserRole<string>, new()
-            where TUserLogin : IdentityUserLogin<string>, new()
-            where TUserToken : IdentityUserToken<string>, new()
-            where TRoleClaim : IdentityRoleClaim<string>, new()
+        if (!TryFindGenericBaseType(builder.UserType, typeof(IdentityUser<>), out Type? _))
         {
-            var identityUserType = FindGenericBaseType(builder.UserType, typeof(IdentityUser<>));
-            if (identityUserType == null)
-            {
-                throw new InvalidOperationException(Resources.NotIdentityUser);
-            }
-
-            var keyType = identityUserType.GenericTypeArguments[0];
-
-            if (builder.RoleType != null)
-            {
-                var identityRoleType = FindGenericBaseType(builder.RoleType, typeof(IdentityRole<>));
-                if (identityRoleType == null)
-                {
-                    throw new InvalidOperationException(Resources.NotIdentityRole);
-                }
-
-                Type userStoreType = typeof(UserStore<,,,,,>).MakeGenericType(builder.UserType, builder.RoleType, typeof(TUserClaim), typeof(TUserRole), typeof(TUserLogin), typeof(TUserToken));
-                
-                Type roleStoreType = typeof(RoleStore<,>).MakeGenericType(builder.RoleType, typeof(TRoleClaim));
-
-                builder.Services.TryAddScoped(typeof(IUserStore<>).MakeGenericType(builder.UserType), userStoreType);
-                builder.Services.TryAddScoped(typeof(IRoleStore<>).MakeGenericType(builder.RoleType), roleStoreType);
-            }
-            else
-            {   // No Roles
-                Type userStoreType = typeof(UserOnlyStore<,,,>).MakeGenericType(builder.UserType, typeof(TUserClaim), typeof(TUserLogin), typeof(TUserToken));
-                builder.Services.TryAddScoped(typeof(IUserStore<>).MakeGenericType(builder.UserType), userStoreType);
-            }
-
+            throw new InvalidOperationException(Resources.NotIdentityUser);
         }
 
-        private static Type FindGenericBaseType(Type currentType, Type genericBaseType)
+        if (builder.RoleType != null)
         {
-            var type = currentType;
-            while (type != null)
+            if (!TryFindGenericBaseType(builder.RoleType, typeof(IdentityRole<>), out Type? _))
             {
-                var genericType = type.IsGenericType ? type.GetGenericTypeDefinition() : null;
-                if (genericType != null && genericType == genericBaseType)
-                {
-                    return type;
-                }
-                type = type.BaseType;
+                throw new InvalidOperationException(Resources.NotIdentityRole);
             }
-            return null;
+
+            Type userStoreType = typeof(UserStore<,,,,,>).MakeGenericType(builder.UserType, builder.RoleType, typeof(TUserClaim), typeof(TUserRole), typeof(TUserLogin), typeof(TUserToken));
+            
+            Type roleStoreType = typeof(RoleStore<,>).MakeGenericType(builder.RoleType, typeof(TRoleClaim));
+
+            builder.Services.TryAddScoped(typeof(IUserStore<>).MakeGenericType(builder.UserType), userStoreType);
+            builder.Services.TryAddScoped(typeof(IRoleStore<>).MakeGenericType(builder.RoleType), roleStoreType);
         }
+        else
+        {   // No Roles
+            Type userStoreType = typeof(UserOnlyStore<,,,>).MakeGenericType(builder.UserType, typeof(TUserClaim), typeof(TUserLogin), typeof(TUserToken));
+            builder.Services.TryAddScoped(typeof(IUserStore<>).MakeGenericType(builder.UserType), userStoreType);
+        }
+
+    }
+
+    private static bool TryFindGenericBaseType(Type currentType, Type genericBaseType, [NotNullWhen(true)]out Type? type)
+    {
+        type = currentType;
+        while (type != null)
+        {
+            var genericType = type.IsGenericType ? type.GetGenericTypeDefinition() : null;
+            if (genericType != null && genericType == genericBaseType)
+            {
+                type = currentType;
+                return true;
+            }
+            type = type.BaseType;
+        }
+        type = null;
+        return false;
     }
 }

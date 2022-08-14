@@ -1,12 +1,6 @@
 ﻿using AspNetCore.Identity.Stores.Repositories;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace AspNetCore.Identity.Stores
 {
@@ -36,9 +30,11 @@ namespace AspNetCore.Identity.Stores
 
         public void Dispose() { }
 
+#pragma warning disable CS8619 // Waiting for .Net7 where the returned value will be nullable
         public Task<TRole> FindByIdAsync(string roleId, CancellationToken cancellationToken) => rolesTable.GetAsync(roleId, cancellationToken);
 
         public Task<TRole> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken) => rolesTable.GetByNormalizedNameAsync(normalizedRoleName, cancellationToken);
+#pragma warning restore CS8619
 
         public Task<string> GetNormalizedRoleNameAsync(TRole role, CancellationToken cancellationToken) => Task.FromResult(role.NormalizedName);
 
@@ -48,13 +44,13 @@ namespace AspNetCore.Identity.Stores
 
         public Task SetNormalizedRoleNameAsync(TRole role, string normalizedName, CancellationToken cancellationToken)
         {
-            (role ?? throw new ArgumentNullException(nameof(role))).NormalizedName = normalizedName;
+            role.NormalizedName = normalizedName;
             return Task.CompletedTask;
         }
 
         public Task SetRoleNameAsync(TRole role, string roleName, CancellationToken cancellationToken)
         {
-            (role ?? throw new ArgumentNullException(nameof(role))).Name = roleName;
+            role.Name = roleName;
             return Task.CompletedTask;
         }
 

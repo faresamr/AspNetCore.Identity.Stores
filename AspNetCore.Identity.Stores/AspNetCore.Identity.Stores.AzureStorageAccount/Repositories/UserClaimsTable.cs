@@ -1,17 +1,10 @@
-﻿using AspNetCore.Identity.Stores.AzureStorageAccount.Extensions;
-using AspNetCore.Identity.Stores.Repositories;
+﻿using AspNetCore.Identity.Stores.Repositories;
 using AspNetCore.Identity.Stores.Shared.Extensions;
-using Azure;
 using Azure.Data.Tables;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
 {
@@ -52,7 +45,9 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                users.Add(await QueryAsync<TUser>(UsersTable<TUser, TKey>.PartitionKey, ConvertToString(userClaim.UserId), cancellationToken: cancellationToken));
+                TUser? user = await QueryAsync<TUser>(UsersTable<TUser, TKey>.PartitionKey, ConvertToString(userClaim.UserId), cancellationToken: cancellationToken);
+                if (user is not null)
+                    users.Add(user);
             }
             return users;
         }

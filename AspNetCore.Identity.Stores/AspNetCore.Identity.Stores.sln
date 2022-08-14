@@ -1,24 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31424.327
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32516.85
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.Identity.Stores", "AspNetCore.Identity.Stores\AspNetCore.Identity.Stores.csproj", "{88C30A36-79AE-4782-9A6D-1EC3A242B2F8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.Identity.Stores.AzureStorageAccount", "AspNetCore.Identity.Stores.AzureStorageAccount\AspNetCore.Identity.Stores.AzureStorageAccount.csproj", "{F0D9B780-4791-4A02-9132-9983FA3ACA16}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleWebApplication", "SampleWebApplication\SampleWebApplication.csproj", "{90F4287D-382F-4325-8B80-E4272B9E891E}"
-EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "AspNetCore.Identity.Stores.Shared", "AspNetCore.Identity.Stores.Shared\AspNetCore.Identity.Stores.Shared.shproj", "{E70497D4-83DC-4EC3-A4C4-9EED147A7DC5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.Identity.Stores.AzureCosmosDB", "AspNetCore.Identity.Stores.AzureCosmosDB\AspNetCore.Identity.Stores.AzureCosmosDB.csproj", "{FEED23F2-F287-4008-8A96-531301C6CCE8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.Identity.Stores.AzureCosmosDB", "AspNetCore.Identity.Stores.AzureCosmosDB\AspNetCore.Identity.Stores.AzureCosmosDB.csproj", "{FEED23F2-F287-4008-8A96-531301C6CCE8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleWebApplication", "SampleWebApplication\SampleWebApplication.csproj", "{B616526A-A9D9-47F1-98A4-499A94AF0774}"
 EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		AspNetCore.Identity.Stores.Shared\AspNetCore.Identity.Stores.Shared.projitems*{e70497d4-83dc-4ec3-a4c4-9eed147a7dc5}*SharedItemsImports = 13
-		AspNetCore.Identity.Stores.Shared\AspNetCore.Identity.Stores.Shared.projitems*{f0d9b780-4791-4a02-9132-9983fa3aca16}*SharedItemsImports = 5
-		AspNetCore.Identity.Stores.Shared\AspNetCore.Identity.Stores.Shared.projitems*{feed23f2-f287-4008-8a96-531301c6cce8}*SharedItemsImports = 5
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -32,19 +27,24 @@ Global
 		{F0D9B780-4791-4A02-9132-9983FA3ACA16}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F0D9B780-4791-4A02-9132-9983FA3ACA16}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F0D9B780-4791-4A02-9132-9983FA3ACA16}.Release|Any CPU.Build.0 = Release|Any CPU
-		{90F4287D-382F-4325-8B80-E4272B9E891E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{90F4287D-382F-4325-8B80-E4272B9E891E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{90F4287D-382F-4325-8B80-E4272B9E891E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{90F4287D-382F-4325-8B80-E4272B9E891E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FEED23F2-F287-4008-8A96-531301C6CCE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FEED23F2-F287-4008-8A96-531301C6CCE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FEED23F2-F287-4008-8A96-531301C6CCE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FEED23F2-F287-4008-8A96-531301C6CCE8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B616526A-A9D9-47F1-98A4-499A94AF0774}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B616526A-A9D9-47F1-98A4-499A94AF0774}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B616526A-A9D9-47F1-98A4-499A94AF0774}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B616526A-A9D9-47F1-98A4-499A94AF0774}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8F05E90D-67CA-4D16-B96B-70F3366EF6C2}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		AspNetCore.Identity.Stores.Shared\AspNetCore.Identity.Stores.Shared.projitems*{e70497d4-83dc-4ec3-a4c4-9eed147a7dc5}*SharedItemsImports = 13
+		AspNetCore.Identity.Stores.Shared\AspNetCore.Identity.Stores.Shared.projitems*{f0d9b780-4791-4a02-9132-9983fa3aca16}*SharedItemsImports = 5
+		AspNetCore.Identity.Stores.Shared\AspNetCore.Identity.Stores.Shared.projitems*{feed23f2-f287-4008-8a96-531301c6cce8}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal
