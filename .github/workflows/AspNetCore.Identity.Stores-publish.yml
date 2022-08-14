@@ -22,7 +22,7 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal AspNetCore.Identity.Stores/AspNetCore.Identity.Stores.sln
     - name: Add Source
-      run: dotnet nuget add source --username faresamr --password ${{ secrets.NUGET }} --store-password-in-clear-text --name NUGET "https://api.nuget.org"
+      run: dotnet nuget add source --username faresamr --password ${{ secrets.NUGET }} --store-password-in-clear-text --name NUGET "https://www.nuget.org"
     - name: Pack nugets
       run: dotnet pack AspNetCore.Identity.Stores/AspNetCore.Identity.Stores.sln -c Release --no-build --output .
     - name: Push to NuGet
