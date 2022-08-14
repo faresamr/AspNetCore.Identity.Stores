@@ -26,4 +26,4 @@ jobs:
     - name: Pack nugets
       run: dotnet pack AspNetCore.Identity.Stores/AspNetCore.Identity.Stores.sln -c Release --no-build --output .
     - name: Push to NuGet
-      run: dotnet nuget push "*.nupkg" --api-key ${{secrets.NUGET}} --source "github"
+      run: dotnet nuget push "*.nupkg" --api-key ${{secrets.NUGET}} --source "github" --username faresamr --password ${{ secrets.PACKAGES_GITHUB_TOKEN }} --store-password-in-clear-text
