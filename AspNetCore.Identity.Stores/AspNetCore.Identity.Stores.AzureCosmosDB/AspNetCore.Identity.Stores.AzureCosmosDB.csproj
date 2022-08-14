@@ -1,37 +1,44 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-    <Authors>Fares Amro</Authors>
-    <PackageProjectUrl>https://github.com/faresamr/AspNetCore.Identity.Stores</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/faresamr/AspNetCore.Identity.Stores</RepositoryUrl>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageTags>AspNetCore;Identity;IdentityStore;CosmosDB</PackageTags>
-    <Description>ASP.NET Core Identity provider that uses Microsoft Azure CosmosDB.</Description>
-    <Company />
-    <Version>1.1.0</Version>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Authors>Fares Amro</Authors>
+		<PackageId>AspNetCore.Identity.Stores.AzureCosmosDB</PackageId>
+		<PackageReadmeFile>AzureCosmosDB.md</PackageReadmeFile>
+		<PackageProjectUrl>https://github.com/faresamr/AspNetCore.Identity.Stores</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/faresamr/AspNetCore.Identity.Stores</RepositoryUrl>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageTags>AspNetCore;Identity;IdentityStore;CosmosDB</PackageTags>
+		<Description>ASP.NET Core Identity provider that uses Microsoft Azure CosmosDB.</Description>
+		<Company />
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Version>2.0.0</Version>
+		<Nullable>enable</Nullable>
+		<WarningsAsErrors>CS8600;CS8602;CS8603;CS8604;CS8605;CS8613;CS8619;CS8625;IDE0059</WarningsAsErrors>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
 
-  <Import Project="..\AspNetCore.Identity.Stores.Shared\AspNetCore.Identity.Stores.Shared.projitems" Label="Shared" />
+	<Import Project="..\AspNetCore.Identity.Stores.Shared\AspNetCore.Identity.Stores.Shared.projitems" Label="Shared" />
 
-  <ItemGroup>
-    <Content Remove="C:\Users\fares\.nuget\packages\microsoft.azure.cosmos\3.20.1\contentFiles\any\netstandard2.0\ThirdPartyNotice.txt" />
-  </ItemGroup>
+	<ItemGroup>
+		<Content Remove="C:\Users\fares\.nuget\packages\microsoft.azure.cosmos\3.20.1\contentFiles\any\netstandard2.0\ThirdPartyNotice.txt" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\AspNetCore.Identity.Stores\AspNetCore.Identity.Stores.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\AspNetCore.Identity.Stores\AspNetCore.Identity.Stores.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="5.0.8" />
-    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.20.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="6.0.8" />
+		<PackageReference Include="Microsoft.Azure.Cosmos" Version="3.29.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+		<None Include="..\..\docs\AzureCosmosDB.md" Pack="true" PackagePath="\"/>
+	</ItemGroup>
 
 </Project>

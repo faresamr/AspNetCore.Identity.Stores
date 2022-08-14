@@ -1,79 +1,72 @@
-﻿using AspNetCore.Identity.Stores.AzureStorageAccount.Extensions;
-using AspNetCore.Identity.Stores.Repositories;
-using Azure;
+﻿using AspNetCore.Identity.Stores.Repositories;
 using Azure.Data.Tables;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories
+namespace AspNetCore.Identity.Stores.AzureStorageAccount.Repositories;
+
+internal class UsersTable<TUser, TKey> : TableStorage, IUsersTable<TUser, TKey>
+    where TUser : IdentityUser<TKey>, new()
+    where TKey : IEquatable<TKey>
 {
-    internal class UsersTable<TUser, TKey> : TableStorage, IUsersTable<TUser, TKey>
-        where TUser : IdentityUser<TKey>, new()
-        where TKey : IEquatable<TKey>
+    internal const string PartitionKey = "User";
+    private readonly IUserClaimsTable<TUser, TKey> userClaimsTable;
+    private readonly IUserLoginsTable<TUser, TKey> userLoginsTable;
+    private readonly IUserRolesTable<TKey> userRolesTable;
+    private readonly IUserTokensTable<TKey> userTokensTable;
+
+    public UsersTable(IDataProtectionProvider dataProtectionProvider,
+                      IOptions<IdentityStoresOptions> options,
+                      IUserClaimsTable<TUser, TKey> userClaimsTable,
+                      IUserLoginsTable<TUser, TKey> userLoginsTable,
+                      IUserRolesTable<TKey> userRolesTable,
+                      IUserTokensTable<TKey> userTokensTable) : base(dataProtectionProvider, options)
     {
-        internal const string PartitionKey = "User";
-        private readonly IUserClaimsTable<TUser, TKey> userClaimsTable;
-        private readonly IUserLoginsTable<TUser, TKey> userLoginsTable;
-        private readonly IUserRolesTable<TKey> userRolesTable;
-        private readonly IUserTokensTable<TKey> userTokensTable;
+        this.userClaimsTable = userClaimsTable;
+        this.userLoginsTable = userLoginsTable;
+        this.userRolesTable = userRolesTable;
+        this.userTokensTable = userTokensTable;
+    }
 
-        public UsersTable(IDataProtectionProvider dataProtectionProvider,
-                          IOptions<IdentityStoresOptions> options,
-                          IUserClaimsTable<TUser, TKey> userClaimsTable,
-                          IUserLoginsTable<TUser, TKey> userLoginsTable,
-                          IUserRolesTable<TKey> userRolesTable,
-                          IUserTokensTable<TKey> userTokensTable) : base(dataProtectionProvider, options)
+    public Task<IdentityResult> AddAsync(TUser user, CancellationToken cancellationToken)
+    {
+        return AddAsync(PartitionKey, ConvertToString(user.Id), user, cancellationToken: cancellationToken);
+    }
+
+    public async Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken)
+    {
+        await Task.WhenAll(new[]
         {
-            this.userClaimsTable = userClaimsTable;
-            this.userLoginsTable = userLoginsTable;
-            this.userRolesTable = userRolesTable;
-            this.userTokensTable = userTokensTable;
-        }
+            userClaimsTable.DeleteUserClaimsAsync(user, cancellationToken),
+            userLoginsTable.DeleteUserLoginsAsync(user, cancellationToken),
+            userRolesTable.DeleteUserRolesAsync(user.Id, cancellationToken),
+            userTokensTable.DeleteUserTokensAsync(user.Id, cancellationToken)
+        });
+        return await DeleteAsync(PartitionKey, ConvertToString(user.Id), cancellationToken: cancellationToken);
+    }
 
-        public Task<IdentityResult> AddAsync(TUser user, CancellationToken cancellationToken)
-        {
-            return AddAsync(PartitionKey, ConvertToString(user.Id), user, cancellationToken: cancellationToken);
-        }
+    public IQueryable<TUser> Get() => Query<TUser>(TableClient.CreateQueryFilter($"PartitionKey eq {PartitionKey}")).AsQueryable();
 
-        public async Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken)
-        {
-            await Task.WhenAll(new[]
-            {
-                userClaimsTable.DeleteUserClaimsAsync(user, cancellationToken),
-                userLoginsTable.DeleteUserLoginsAsync(user, cancellationToken),
-                userRolesTable.DeleteUserRolesAsync(user.Id, cancellationToken),
-                userTokensTable.DeleteUserTokensAsync(user.Id, cancellationToken)
-            });
-            return await DeleteAsync(PartitionKey, ConvertToString(user.Id), cancellationToken: cancellationToken);
-        }
+    public Task<TUser?> GetAsync(TKey userId, CancellationToken cancellationToken)
+    {
+        return QueryAsync<TUser>(PartitionKey, ConvertToString(userId), cancellationToken: cancellationToken);
+    }
 
-        public IQueryable<TUser> Get() => Query<TUser>(TableClient.CreateQueryFilter($"PartitionKey eq {PartitionKey}")).AsQueryable();
+    public async Task<TUser?> GetByNormalizedEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
+    {
+        string filter = TableClient.CreateQueryFilter($"PartitionKey eq {PartitionKey} and NormalizedEmail eq {normalizedEmail}");
+        return (await QueryAsync<TUser>(filter: filter, cancellationToken: cancellationToken)).FirstOrDefault();
+    }
 
-        public Task<TUser> GetAsync(TKey userId, CancellationToken cancellationToken)
-        {
-            return QueryAsync<TUser>(PartitionKey, ConvertToString(userId), cancellationToken: cancellationToken);
-        }
+    public async Task<TUser?> GetByNormalizedUserNameAsync(string normalizedUserName, CancellationToken cancellationToken)
+    {
+        string filter = TableClient.CreateQueryFilter($"PartitionKey eq {PartitionKey} and NormalizedUserName eq {normalizedUserName}");
+        return (await QueryAsync<TUser>(filter: filter, cancellationToken: cancellationToken)).FirstOrDefault();
+    }
 
-        public async Task<TUser> GetByNormalizedEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
-        {
-            string filter = TableClient.CreateQueryFilter($"PartitionKey eq {PartitionKey} and NormalizedEmail eq {normalizedEmail}");
-            return (await QueryAsync<TUser>(filter: filter, cancellationToken: cancellationToken)).FirstOrDefault();
-        }
-
-        public async Task<TUser> GetByNormalizedUserNameAsync(string normalizedUserName, CancellationToken cancellationToken)
-        {
-            string filter = TableClient.CreateQueryFilter($"PartitionKey eq {PartitionKey} and NormalizedUserName eq {normalizedUserName}");
-            return (await QueryAsync<TUser>(filter: filter, cancellationToken: cancellationToken)).FirstOrDefault();
-        }
-
-        public Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken)
-        {
-            return UpdateAsync(PartitionKey, ConvertToString(user.Id), user, cancellationToken);
-        }
+    public Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken)
+    {
+        return UpdateAsync(PartitionKey, ConvertToString(user.Id), user, cancellationToken);
     }
 }

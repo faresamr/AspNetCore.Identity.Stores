@@ -1,40 +1,22 @@
-name: Publish Packages
+name: Publish NuGet Packages
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - AspNetCore.Identity.Stores/**
-
+  release:
+    types: [published]
+    
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Setup .NET SDK
       uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 5.0.x
-    - name: Restore dependencies
-      run: dotnet restore AspNetCore.Identity.Stores/AspNetCore.Identity.Stores
     - name: Build
-      run: dotnet build --configuration Release --no-restore AspNetCore.Identity.Stores/AspNetCore.Identity.Stores
+      run: dotnet build -c Release
     - name: Test
-      run: dotnet test --no-build --verbosity normal AspNetCore.Identity.Stores/AspNetCore.Identity.Stores
-    - name: Publish AspNetCore.Identity.Stores
-      uses: brandedoutcast/publish-nuget@v2
-      with:
-          PROJECT_FILE_PATH: AspNetCore.Identity.Stores/AspNetCore.Identity.Stores/AspNetCore.Identity.Stores.csproj
-          NUGET_KEY: ${{secrets.NUGET}}
-    - name: Publish AspNetCore.Identity.Stores.AzureStorageAccount
-      uses: brandedoutcast/publish-nuget@v2
-      with:
-          PROJECT_FILE_PATH: AspNetCore.Identity.Stores/AspNetCore.Identity.Stores.AzureStorageAccount/AspNetCore.Identity.Stores.AzureStorageAccount.csproj
-          NUGET_KEY: ${{secrets.NUGET}}
-    - name: Publish AspNetCore.Identity.Stores.AzureCosmosDB
-      uses: brandedoutcast/publish-nuget@v2
-      with:
-          PROJECT_FILE_PATH: AspNetCore.Identity.Stores/AspNetCore.Identity.Stores.AzureCosmosDB/AspNetCore.Identity.Stores.AzureCosmosDB.csproj
-          NUGET_KEY: ${{secrets.NUGET}}
+      run: dotnet test -c Release --no-build
+    - name: Pack nugets
+      run: dotnet pack -c Release --no-build --output .
+    - name: Push to NuGet
+      run: dotnet nuget push "*.nupkg" --api-key ${{secrets.NUGET}} --source "github"
