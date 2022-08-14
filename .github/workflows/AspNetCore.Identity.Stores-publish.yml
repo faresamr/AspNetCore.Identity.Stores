@@ -21,6 +21,8 @@ jobs:
       run: dotnet build --configuration Release --no-restore AspNetCore.Identity.Stores/AspNetCore.Identity.Stores.sln
     - name: Test
       run: dotnet test --no-build --verbosity normal AspNetCore.Identity.Stores/AspNetCore.Identity.Stores.sln
+    - name: Add Source
+      run: dotnet nuget add source --username faresamr --password ${{ secrets.PACKAGES_GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/faresamr/index.json"
     - name: Pack nugets
       run: dotnet pack AspNetCore.Identity.Stores/AspNetCore.Identity.Stores.sln -c Release --no-build --output .
     - name: Push to NuGet
