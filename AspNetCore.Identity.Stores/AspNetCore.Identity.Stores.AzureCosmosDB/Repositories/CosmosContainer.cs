@@ -23,7 +23,7 @@ internal abstract class CosmosContainer
 
         dataProtector = dataProtectionProvider.CreateProtector(options.Value.GetContainerId());
 
-        CosmosClient cosmosClient = new(options.Value.GetConnectionString());
+        CosmosClient cosmosClient = options.Value.GetCosmosClient();
         Database database = cosmosClient.GetDatabase(options.Value.GetDatabaseId());
         container = database.GetContainer(options.Value.GetContainerId());
     }
