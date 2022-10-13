@@ -25,7 +25,7 @@ This is how to use Azure storage account as storage for ASP.NET identity.
     > **_NOTE:_**  For local development you may use "UseDevelopmentStorage=true" as connection string to connect to Azure storage emulator.
 
 ## Configuration
-As shown in the code snippet from point 4, **IdentityStoresOptions** has an extension method **UseAzureStorageAccount** to configure the connection and it has 2 parameters:
+As shown in the code snippet from point 4, **IdentityStoresOptions** has an extension method **UseAzureStorageAccount** to configure the connection, and it has 2 parameters:
 - connectionString: To specify the connection string of CosmosDB instance.
 - tableName (optinal): To specify the table which will be used, the default value is **AspNetIdentity**
 
