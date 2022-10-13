@@ -14,8 +14,8 @@ internal abstract class TableStorage
 
     protected TableStorage(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options)
     {
-        dataProtector = dataProtectionProvider.CreateProtector(options.Value.GetTableName());
-        tableClient = new(options.Value.GetConnectionString(), options.Value.GetTableName());
+        tableClient = options.Value.GetTableClient();
+        dataProtector = dataProtectionProvider.CreateProtector(tableClient.Name);
     }
 
     protected static string ConvertToString<T>(T value) where T : IEquatable<T> => Convert.ToString(value) ?? string.Empty;
