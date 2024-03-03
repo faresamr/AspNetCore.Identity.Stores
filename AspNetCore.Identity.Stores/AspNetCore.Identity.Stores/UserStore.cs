@@ -32,11 +32,7 @@ internal sealed class UserStore<TUser, TRole, TUserClaim, TUserRole, TUserLogin,
     #region IUserRoleStore
     public async  Task AddToRoleAsync(TUser user, string normalizedRoleName, CancellationToken cancellationToken)
     {
-        var roleEntity = await rolesTable.GetByNormalizedNameAsync(normalizedRoleName, cancellationToken);
-        if (roleEntity == null)
-        {
-            throw new InvalidOperationException($"Role Not Found");
-        }
+        var roleEntity = await rolesTable.GetByNormalizedNameAsync(normalizedRoleName, cancellationToken) ?? throw new InvalidOperationException($"Role Not Found");
         TUserRole userRole = new()
         {
             UserId = user.Id,
@@ -47,11 +43,7 @@ internal sealed class UserStore<TUser, TRole, TUserClaim, TUserRole, TUserLogin,
 
     public async Task RemoveFromRoleAsync(TUser user, string normalizedRoleName, CancellationToken cancellationToken)
     {
-        var roleEntity = await rolesTable.GetByNormalizedNameAsync(normalizedRoleName, cancellationToken);
-        if (roleEntity == null)
-        {
-            throw new InvalidOperationException($"Role Not Found");
-        }
+        var roleEntity = await rolesTable.GetByNormalizedNameAsync(normalizedRoleName, cancellationToken) ?? throw new InvalidOperationException($"Role Not Found");
         await userRolesTable.DeleteAsync(user.Id, roleEntity.Id, cancellationToken);
     }
 
@@ -60,8 +52,11 @@ internal sealed class UserStore<TUser, TRole, TUserClaim, TUserRole, TUserLogin,
         var roleIds = (await userRolesTable.GetRolesAsync(user.Id, cancellationToken)).Select(i => i.RoleId);
         if (roleIds.Any())
         {
-            var roles = await rolesTable.GetAsync(cancellationToken);
-            return roles.Join(roleIds, role => role.Id, id => id, (role, id) => role.Name).ToList();
+            IEnumerable<TRole> roles = await rolesTable.GetAsync(cancellationToken);
+            return roles
+                .Join(roleIds, role => role.Id, id => id, (role, id) => role.Name)
+                .OfType<string>()
+                .ToList();
         }
         else
             return Enumerable.Empty<string>().ToList();
@@ -69,21 +64,13 @@ internal sealed class UserStore<TUser, TRole, TUserClaim, TUserRole, TUserLogin,
 
     public async Task<bool> IsInRoleAsync(TUser user, string normalizedRoleName, CancellationToken cancellationToken)
     {
-        var roleEntity = await rolesTable.GetByNormalizedNameAsync(normalizedRoleName, cancellationToken);
-        if (roleEntity == null)
-        {
-            throw new InvalidOperationException($"Role Not Found");
-        }
+        var roleEntity = await rolesTable.GetByNormalizedNameAsync(normalizedRoleName, cancellationToken) ?? throw new InvalidOperationException($"Role Not Found");
         return (await userRolesTable.GetRolesAsync(user.Id, cancellationToken)).Any(i => i.RoleId == roleEntity.Id);
     }
 
     public async Task<IList<TUser>> GetUsersInRoleAsync(string normalizedRoleName, CancellationToken cancellationToken)
     {
-        var roleEntity = await rolesTable.GetByNormalizedNameAsync(normalizedRoleName, cancellationToken);
-        if (roleEntity == null)
-        {
-            throw new InvalidOperationException($"Role Not Found");
-        }
+        var roleEntity = await rolesTable.GetByNormalizedNameAsync(normalizedRoleName, cancellationToken) ?? throw new InvalidOperationException($"Role Not Found");
         return (await userRolesTable.GetUsersAsync(roleEntity.Id, cancellationToken)).Select(async i => await usersTable.GetAsync(i.UserId, cancellationToken)).Select(i => i.Result).OfType<TUser>().ToList();
     }
     #endregion

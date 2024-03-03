@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<Authors>Fares Amro</Authors>
 		<PackageId>AspNetCore.Identity.Stores.AzureCosmosDB</PackageId>
 		<PackageReadmeFile>AzureCosmosDB.md</PackageReadmeFile>
@@ -28,8 +28,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="6.0.8" />
-		<PackageReference Include="Microsoft.Azure.Cosmos" Version="3.29.0" />
+		<PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="8.0.2" />
+		<PackageReference Include="Microsoft.Azure.Cosmos" Version="3.38.1" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -37,7 +37,7 @@
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
 		</None>
-		<None Include="..\..\docs\AzureCosmosDB.md" Pack="true" PackagePath="\"/>
+		<None Include="..\..\docs\AzureCosmosDB.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 </Project>

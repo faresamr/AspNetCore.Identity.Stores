@@ -33,7 +33,7 @@ public static class IdentitySeederExtensions
     {
         foreach (var role in identitySeeds.Roles)
         {
-            if (!roleManager.RoleExistsAsync(role.Role.Name).Result)
+            if (role.Role.Name is string name && !roleManager.RoleExistsAsync(name).Result)
             {
                 IdentityResult result = roleManager.CreateAsync(role.Role).Result;
                 if (result.Succeeded)
@@ -51,7 +51,7 @@ public static class IdentitySeederExtensions
     {
         foreach (var user in identitySeeds.Users)
         {
-            if (userManager.FindByEmailAsync(user.User.Email).Result == null)
+            if (user.User.Email is string email && userManager.FindByEmailAsync(email).Result == null)
             {
                 IdentityResult result = userManager.CreateAsync(user.User, user.Password).Result;
                 if (result.Succeeded)
@@ -67,12 +67,15 @@ public static class IdentitySeederExtensions
                     {
                         foreach (TRole role in user.Roles)
                         {
-                            if (!identitySeeds.Roles.Any(i => i.Role.Name == role.Name)
-                                && !roleManager.RoleExistsAsync(role.Name).Result)
+                            if (role.Name is not null)
                             {
-                                roleManager.CreateAsync(role).Wait();
+                                if (!identitySeeds.Roles.Any(i => i.Role.Name == role.Name)
+                                    && !roleManager.RoleExistsAsync(role.Name).Result)
+                                {
+                                    roleManager.CreateAsync(role).Wait();
+                                }
+                                userManager.AddToRoleAsync(user.User, role.Name).Wait();
                             }
-                            userManager.AddToRoleAsync(user.User, role.Name).Wait();
                         }
                     }
                 }
@@ -90,8 +93,8 @@ public class IdentitySeeds<TUser, TRole>
 
     }
 
-    internal Collection<UserDescriptor> Users { get; } = new();
-    internal Collection<RoleDescriptor> Roles { get; } = new();
+    internal Collection<UserDescriptor> Users { get; } = [];
+    internal Collection<RoleDescriptor> Roles { get; } = [];
 
     public IdentitySeeds<TUser, TRole> AddUser(TUser user, string password, IEnumerable<Claim>? claims = null, IEnumerable<TRole>? roles = null)
     {
