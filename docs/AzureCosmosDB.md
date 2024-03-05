@@ -29,7 +29,7 @@ As shown in the code snippet from point 4, **IdentityStoresOptions** has an exte
 - databaseId: To specify the database which will be used.
 - containerId (optinal): To specify the container which will be used, the default value is **AspNetIdentity**
 
-> **Note**: If the specified database or container not exist, they will get created on startup.
+> **Note**: If the specified database or container not exist, they will get created on startup if [UseIdentitySeedingAsync](https://github.com/faresamr/AspNetCore.Identity.Stores/tree/main/docs/SeedUsersAndRolesData.md) is user, otherwise an exception will be thrown.
 
 See more:
 - [Example](https://github.com/faresamr/AspNetCore.Identity.Stores/tree/main/AspNetCore.Identity.Stores/SampleWebApplication)

@@ -15,7 +15,7 @@ string connectionString = builder.Configuration.GetConnectionString("DefaultConn
 #if AzureStorageAccount
 //Configure identity repository connection
 builder.Services.Configure<IdentityStoresOptions>(options => options
-    .UseAzureStorageAccount(connectionString, tableName: "Version8"));
+    .UseAzureStorageAccount(connectionString));
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
