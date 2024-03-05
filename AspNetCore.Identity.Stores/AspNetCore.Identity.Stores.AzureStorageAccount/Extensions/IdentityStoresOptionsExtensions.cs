@@ -6,7 +6,7 @@ namespace AspNetCore.Identity.Stores.AzureStorageAccount.Extensions;
 
 public static class IdentityStoresOptionsExtensions
 {
-    private static readonly Dictionary<IdentityStoresOptions, TableClient> options = new();
+    private static readonly Dictionary<IdentityStoresOptions, TableClient> options = [];
 
     public static IdentityStoresOptions UseAzureStorageAccount(this IdentityStoresOptions identityStoresOptions, Uri endpoint, TableClientOptions? options = null) => identityStoresOptions.UseAzureStorageAccount(new TableClient(endpoint, options));
 

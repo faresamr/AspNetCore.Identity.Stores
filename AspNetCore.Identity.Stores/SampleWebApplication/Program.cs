@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+string connectionString = builder.Configuration.GetConnectionString("DefaultConnection")?? throw new Exception("Missing connection string");
 
 #if AzureStorageAccount
 //Configure identity repository connection
@@ -60,7 +60,7 @@ app.UseAuthorization();
 app.MapRazorPages();
 
 // Seed identity
-app.UseIdentitySeeding<IdentityUser, IdentityRole>(seeds =>
+await app.UseIdentitySeedingAsync<IdentityUser, IdentityRole>(seeds =>
 {
     seeds
         .AddRole(role: new IdentityRole("Admin"))

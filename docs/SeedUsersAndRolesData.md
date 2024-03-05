@@ -13,7 +13,7 @@ This is how to seed identity framework with users and roles.
     
     ```csharp
     // Seed identity
-    app.UseIdentitySeeding<IdentityUser, IdentityRole>(seeds =>
+    await app.UseIdentitySeedingAsync<IdentityUser, IdentityRole>(seeds =>
     {
         seeds
             .AddRole(role: new IdentityRole("Admin"))

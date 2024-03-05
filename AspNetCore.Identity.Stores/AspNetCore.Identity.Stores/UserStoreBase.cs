@@ -54,25 +54,23 @@ internal abstract class UserStoreBase<TUser, TUserClaim, TUserLogin, TUserToken>
 
     public Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken) => usersTable.DeleteAsync(user, cancellationToken);
 
-#pragma warning disable CS8619 // Waiting for .Net7 where the returned value will be nullable
-    public Task<TUser> FindByIdAsync(string userId, CancellationToken cancellationToken) => usersTable.GetAsync(userId, cancellationToken);
+    public Task<TUser?> FindByIdAsync(string userId, CancellationToken cancellationToken) => usersTable.GetAsync(userId, cancellationToken);
 
-    public Task<TUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken) => usersTable.GetByNormalizedUserNameAsync(normalizedUserName, cancellationToken);
-#pragma warning restore CS8619
+    public Task<TUser?> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken) => usersTable.GetByNormalizedUserNameAsync(normalizedUserName, cancellationToken);
 
-    public Task<string> GetNormalizedUserNameAsync(TUser user, CancellationToken cancellationToken) => Task.FromResult(user.NormalizedUserName);
+    public Task<string?> GetNormalizedUserNameAsync(TUser user, CancellationToken cancellationToken) => Task.FromResult(user.NormalizedUserName);
 
     public Task<string> GetUserIdAsync(TUser user, CancellationToken cancellationToken) => Task.FromResult(Convert.ToString(user.Id));
 
-    public Task<string> GetUserNameAsync(TUser user, CancellationToken cancellationToken) => Task.FromResult(user.UserName);
+    public Task<string?> GetUserNameAsync(TUser user, CancellationToken cancellationToken) => Task.FromResult(user.UserName);
 
-    public Task SetNormalizedUserNameAsync(TUser user, string normalizedName, CancellationToken cancellationToken)
+    public Task SetNormalizedUserNameAsync(TUser user, string? normalizedName, CancellationToken cancellationToken)
     {
         user.NormalizedUserName = normalizedName;
         return Task.CompletedTask;
     }
 
-    public Task SetUserNameAsync(TUser user, string userName, CancellationToken cancellationToken)
+    public Task SetUserNameAsync(TUser user, string? userName, CancellationToken cancellationToken)
     {
         user.UserName = userName;
         return Task.CompletedTask;
@@ -82,25 +80,25 @@ internal abstract class UserStoreBase<TUser, TUserClaim, TUserLogin, TUserToken>
     #endregion
 
     #region IUserPasswordStore
-    public Task SetPasswordHashAsync(TUser user, string passwordHash, CancellationToken cancellationToken)
+    public Task SetPasswordHashAsync(TUser user, string? passwordHash, CancellationToken cancellationToken)
     {
         user.PasswordHash = passwordHash;
         return Task.CompletedTask;
     }
 
-    public Task<string> GetPasswordHashAsync(TUser user, CancellationToken cancellationToken) => Task.FromResult(user.PasswordHash);
+    public Task<string?> GetPasswordHashAsync(TUser user, CancellationToken cancellationToken) => Task.FromResult(user.PasswordHash);
 
     public Task<bool> HasPasswordAsync(TUser user, CancellationToken cancellationToken) => Task.FromResult(!string.IsNullOrEmpty(user.PasswordHash));
     #endregion
 
     #region IUserEmailStore
-    public Task SetEmailAsync(TUser user, string email, CancellationToken cancellationToken)
+    public Task SetEmailAsync(TUser user, string? email, CancellationToken cancellationToken)
     {
         user.Email = email;
         return Task.CompletedTask;
     }
 
-    public Task<string> GetEmailAsync(TUser user, CancellationToken cancellationToken) => Task.FromResult(user.Email);
+    public Task<string?> GetEmailAsync(TUser user, CancellationToken cancellationToken) => Task.FromResult(user.Email);
 
     public Task<bool> GetEmailConfirmedAsync(TUser user, CancellationToken cancellationToken) => Task.FromResult(user.EmailConfirmed);
 
@@ -110,13 +108,11 @@ internal abstract class UserStoreBase<TUser, TUserClaim, TUserLogin, TUserToken>
         return Task.CompletedTask;
     }
 
-#pragma warning disable CS8619 // Waiting for .Net7 where the returned value will be nullable
-    public Task<TUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken) => usersTable.GetByNormalizedEmailAsync(normalizedEmail, cancellationToken);
-#pragma warning restore CS8619
+    public Task<TUser?> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken) => usersTable.GetByNormalizedEmailAsync(normalizedEmail, cancellationToken);
 
-    public Task<string> GetNormalizedEmailAsync(TUser user, CancellationToken cancellationToken) => Task.FromResult(user.NormalizedEmail);
+    public Task<string?> GetNormalizedEmailAsync(TUser user, CancellationToken cancellationToken) => Task.FromResult(user.NormalizedEmail);
 
-    public Task SetNormalizedEmailAsync(TUser user, string normalizedEmail, CancellationToken cancellationToken)
+    public Task SetNormalizedEmailAsync(TUser user, string? normalizedEmail, CancellationToken cancellationToken)
     {
         user.NormalizedEmail = normalizedEmail;
         return Task.CompletedTask;
@@ -124,13 +120,13 @@ internal abstract class UserStoreBase<TUser, TUserClaim, TUserLogin, TUserToken>
     #endregion
 
     #region IUserPhoneNumberStore
-    public Task SetPhoneNumberAsync(TUser user, string phoneNumber, CancellationToken cancellationToken)
+    public Task SetPhoneNumberAsync(TUser user, string? phoneNumber, CancellationToken cancellationToken)
     {
         user.PhoneNumber = phoneNumber;
         return Task.CompletedTask;
     }
 
-    public Task<string> GetPhoneNumberAsync(TUser user, CancellationToken cancellationToken) => Task.FromResult(user.PhoneNumber);
+    public Task<string?> GetPhoneNumberAsync(TUser user, CancellationToken cancellationToken) => Task.FromResult(user.PhoneNumber);
 
     public Task<bool> GetPhoneNumberConfirmedAsync(TUser user, CancellationToken cancellationToken) => Task.FromResult(user.PhoneNumberConfirmed);
 
@@ -148,7 +144,7 @@ internal abstract class UserStoreBase<TUser, TUserClaim, TUserLogin, TUserToken>
         return Task.CompletedTask;
     }
 
-    public Task<string> GetSecurityStampAsync(TUser user, CancellationToken cancellationToken) => Task.FromResult(user.SecurityStamp);
+    public Task<string?> GetSecurityStampAsync(TUser user, CancellationToken cancellationToken) => Task.FromResult(user.SecurityStamp);
     #endregion
 
     #region IUserTwoFactorStore
@@ -206,9 +202,7 @@ internal abstract class UserStoreBase<TUser, TUserClaim, TUserLogin, TUserToken>
 
     public async Task<IList<UserLoginInfo>> GetLoginsAsync(TUser user, CancellationToken cancellationToken) => (await userLoginsTable.GetAsync(user, cancellationToken)).Select(i => new UserLoginInfo(i.LoginProvider, i.ProviderKey, i.ProviderDisplayName)).ToList();
 
-#pragma warning disable CS8619 // Waiting for .Net7 where the returned value will be nullable
-    public Task<TUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken) => userLoginsTable.GetAsync(loginProvider, providerKey, cancellationToken);
-#pragma warning restore CS8619
+    public Task<TUser?> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken) => userLoginsTable.GetAsync(loginProvider, providerKey, cancellationToken);
     #endregion
 
     #region IUserClaimStore
@@ -257,7 +251,7 @@ internal abstract class UserStoreBase<TUser, TUserClaim, TUserLogin, TUserToken>
     #endregion
 
     #region IUserAuthenticationTokenStore
-    public Task SetTokenAsync(TUser user, string loginProvider, string name, string value, CancellationToken cancellationToken)
+    public Task SetTokenAsync(TUser user, string loginProvider, string name, string? value, CancellationToken cancellationToken)
     {
         TUserToken userToken = new()
         {
@@ -271,19 +265,17 @@ internal abstract class UserStoreBase<TUser, TUserClaim, TUserLogin, TUserToken>
 
     public Task RemoveTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken) => userTokensTable.DeleteAsync(user.Id, loginProvider, name, cancellationToken);
 
-#pragma warning disable CS8603 // Waiting for .Net7 where the returned value will be nullable
-    public async Task<string> GetTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken) => (await userTokensTable.GetAsync(user.Id, loginProvider, name, cancellationToken))?.Value;
-#pragma warning restore CS8603 // Possible null reference return.
+    public async Task<string?> GetTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken) => (await userTokensTable.GetAsync(user.Id, loginProvider, name, cancellationToken))?.Value;
     #endregion
 
     #region IUserAuthenticatorKeyStore
     public Task SetAuthenticatorKeyAsync(TUser user, string key, CancellationToken cancellationToken) => SetTokenAsync(user, InternalLoginProvider, AuthenticatorKeyTokenName, key, cancellationToken);
 
-    public Task<string> GetAuthenticatorKeyAsync(TUser user, CancellationToken cancellationToken) => GetTokenAsync(user, InternalLoginProvider, AuthenticatorKeyTokenName, cancellationToken);
+    public Task<string?> GetAuthenticatorKeyAsync(TUser user, CancellationToken cancellationToken) => GetTokenAsync(user, InternalLoginProvider, AuthenticatorKeyTokenName, cancellationToken);
     #endregion
 
     #region IUserTwoFactorRecoveryCodeStore
-    public Task ReplaceCodesAsync(TUser user, IEnumerable<string> recoveryCodes, CancellationToken cancellationToken)
+    public Task ReplaceCodesAsync(TUser user, IEnumerable<string?> recoveryCodes, CancellationToken cancellationToken)
     {
         var mergedCodes = string.Join(";", recoveryCodes);
         return SetTokenAsync(user, InternalLoginProvider, RecoveryCodeTokenName, mergedCodes, cancellationToken);

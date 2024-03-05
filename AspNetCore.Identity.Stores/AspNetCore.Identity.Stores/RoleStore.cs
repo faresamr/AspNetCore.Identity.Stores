@@ -30,25 +30,23 @@ namespace AspNetCore.Identity.Stores
 
         public void Dispose() { }
 
-#pragma warning disable CS8619 // Waiting for .Net7 where the returned value will be nullable
-        public Task<TRole> FindByIdAsync(string roleId, CancellationToken cancellationToken) => rolesTable.GetAsync(roleId, cancellationToken);
+        public Task<TRole?> FindByIdAsync(string roleId, CancellationToken cancellationToken) => rolesTable.GetAsync(roleId, cancellationToken);
 
-        public Task<TRole> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken) => rolesTable.GetByNormalizedNameAsync(normalizedRoleName, cancellationToken);
-#pragma warning restore CS8619
+        public Task<TRole?> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken) => rolesTable.GetByNormalizedNameAsync(normalizedRoleName, cancellationToken);
 
-        public Task<string> GetNormalizedRoleNameAsync(TRole role, CancellationToken cancellationToken) => Task.FromResult(role.NormalizedName);
+        public Task<string?> GetNormalizedRoleNameAsync(TRole role, CancellationToken cancellationToken) => Task.FromResult(role.NormalizedName);
 
         public Task<string> GetRoleIdAsync(TRole role, CancellationToken cancellationToken) => Task.FromResult(Convert.ToString(role.Id));
 
-        public Task<string> GetRoleNameAsync(TRole role, CancellationToken cancellationToken) => Task.FromResult(role.Name);
+        public Task<string?> GetRoleNameAsync(TRole role, CancellationToken cancellationToken) => Task.FromResult(role.Name);
 
-        public Task SetNormalizedRoleNameAsync(TRole role, string normalizedName, CancellationToken cancellationToken)
+        public Task SetNormalizedRoleNameAsync(TRole role, string? normalizedName, CancellationToken cancellationToken)
         {
             role.NormalizedName = normalizedName;
             return Task.CompletedTask;
         }
 
-        public Task SetRoleNameAsync(TRole role, string roleName, CancellationToken cancellationToken)
+        public Task SetRoleNameAsync(TRole role, string? roleName, CancellationToken cancellationToken)
         {
             role.Name = roleName;
             return Task.CompletedTask;

@@ -16,10 +16,7 @@ internal abstract class CosmosContainer
 
     public CosmosContainer(IDataProtectionProvider dataProtectionProvider, IOptions<IdentityStoresOptions> options)
     {
-        if (options is null)
-        {
-            throw new ArgumentNullException(nameof(options));
-        }
+        ArgumentNullException.ThrowIfNull(options);
 
         dataProtector = dataProtectionProvider.CreateProtector(options.Value.GetContainerId());
 
@@ -82,7 +79,7 @@ internal abstract class CosmosContainer
         {
             FeedIterator<CosmosContainerEntity> queryResultSetIterator = container.GetItemQueryIterator<CosmosContainerEntity>(queryDefinition);
 
-            List<T> entities = new();
+            List<T> entities = [];
 
             while (queryResultSetIterator.HasMoreResults)
             {
@@ -101,7 +98,7 @@ internal abstract class CosmosContainer
     }
     protected IEnumerable<T> Query<T>(QueryDefinition queryDefinition, CancellationToken cancellationToken = default) where T : class, new()
     {
-        return QueryAsync<T>(queryDefinition, cancellationToken).Result;
+        return QueryAsync<T>(queryDefinition, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
     protected async Task<T?> QueryAsync<T>(string partitionKey, string rowKey, CancellationToken cancellationToken = default) where T : class, new()
@@ -190,7 +187,7 @@ internal abstract class CosmosContainer
         {
             if (property.GetValue(obj) is object propertyValue)
             {
-                if (property.GetCustomAttribute<ProtectedPersonalDataAttribute>() is ProtectedPersonalDataAttribute)
+                if (property.GetCustomAttribute<ProtectedPersonalDataAttribute>() is not null)
                 {
                     entity.Add(property.Name, dataProtector.Protect(propertyValue.ConvertToByteArray()));
                 }
