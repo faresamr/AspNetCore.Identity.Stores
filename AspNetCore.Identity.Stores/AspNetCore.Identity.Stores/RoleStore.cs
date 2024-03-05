@@ -40,13 +40,13 @@ namespace AspNetCore.Identity.Stores
 
         public Task<string?> GetRoleNameAsync(TRole role, CancellationToken cancellationToken) => Task.FromResult(role.Name);
 
-        public Task SetNormalizedRoleNameAsync(TRole role, string normalizedName, CancellationToken cancellationToken)
+        public Task SetNormalizedRoleNameAsync(TRole role, string? normalizedName, CancellationToken cancellationToken)
         {
             role.NormalizedName = normalizedName;
             return Task.CompletedTask;
         }
 
-        public Task SetRoleNameAsync(TRole role, string roleName, CancellationToken cancellationToken)
+        public Task SetRoleNameAsync(TRole role, string? roleName, CancellationToken cancellationToken)
         {
             role.Name = roleName;
             return Task.CompletedTask;

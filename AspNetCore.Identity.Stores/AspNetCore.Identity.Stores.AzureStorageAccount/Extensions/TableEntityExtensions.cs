@@ -39,7 +39,7 @@ internal static class TableEntityExtensions
         {
             if (property.GetValue(obj) is object propertyValue)
             {
-                if (property.GetCustomAttribute<ProtectedPersonalDataAttribute>() is ProtectedPersonalDataAttribute)
+                if (property.GetCustomAttribute<ProtectedPersonalDataAttribute>() is not null)
                 {
                     entity.Add(property.Name, dataProtector.Protect(propertyValue.ConvertToByteArray()));
                 }

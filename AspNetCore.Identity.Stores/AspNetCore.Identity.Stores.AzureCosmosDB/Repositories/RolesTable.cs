@@ -26,11 +26,11 @@ internal class RolesTable<TRole, TKey> : CosmosContainer, IRolesTable<TRole, TKe
 
     public async Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken)
     {
-        await Task.WhenAll(new[]
-        {
+        await Task.WhenAll(
+        [
             roleClaimsTable.DeleteRoleClaimsAsync(role, cancellationToken),
             userRolesTable.DeleteRoleUsersAsync(role.Id, cancellationToken)
-        });
+        ]);
         return await DeleteAsync(PartitionKey, ConvertToString(role.Id), cancellationToken: cancellationToken);
     }
 

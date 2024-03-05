@@ -7,12 +7,12 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace AspNetCore.Identity.Stores.AzureCosmosDB.Extensions;
 
 /// <summary>
-/// Contains extension methods to <see cref="IdentityBuilder"/> for adding Azure Table Storage stores.
+/// Contains extension methods to <see cref="IdentityBuilder"/> for adding Azure CosmosDB stores.
 /// </summary>
 public static class IdentityAzureCosmosDBBuilderExtensions
 {
     /// <summary>
-    /// Adds an Azure Table Storage implementation of identity information stores.
+    /// Adds an Azure CosmosDB implementation of identity information stores.
     /// </summary>
     /// <param name="builder">The <see cref="IdentityBuilder"/> instance this method extends.</param>
     /// <returns>The <see cref="IdentityBuilder"/> instance this method extends.</returns>
@@ -27,6 +27,7 @@ public static class IdentityAzureCosmosDBBuilderExtensions
         where TUserToken : IdentityUserToken<string>, new()
         where TRoleClaim : IdentityRoleClaim<string>, new()
     {
+        builder.Services.AddTransient<IStoreInitializer, CosmosDbStoreInitializer>();
         builder.AddStores<TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim>();
         AddStorageTables<string, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim>(builder);
 
